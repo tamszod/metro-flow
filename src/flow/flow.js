@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Station from './utils/station'
-import ReactFlow, { ControlButton, Controls, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow } from "reactflow"
+import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from "reactflow"
 import Line from "./utils/line";
 import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { startRoundAction } from "../state/logic";
-import { addEdges, buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
-import { calculateRoundTime, selectDay, selectEdges, selectLinesColors, selectNodes } from "../state/selectors";
+import { buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
+import { selectDay, selectEdges, selectLinesColors, selectNodes } from "../state/selectors";
 import { areaHeight, areaWidth, pace } from "../config";
 
 const proOptions = { hideAttribution: true };
@@ -22,11 +22,11 @@ export const Flow = () => {
     const [timeLeft, setTimeLeft] = useState(0)
     const intervalRef = useRef();
     //const { setViewport, zoomIn, zoomOut } = useReactFlow();
-    const [x, setX] = useState(200);
-    const [y, setY] = useState(200);
-    const [zoom, setZoom] = useState(1);
+    //const [x, setX] = useState(200);
+    //const [y, setY] = useState(200);
+    //const [zoom, setZoom] = useState(1);
 
-    const game = useSelector(state => state.game)
+    //const game = useSelector(state => state.game)
 
     useEffect(() => {
         if (started){
@@ -40,10 +40,10 @@ export const Flow = () => {
                 return () => clearInterval(intervalRef.current);
             } 
         }
-    }, [timeLeft, started]);
+    }, [timeLeft, started, dispatch]);
 
     useEffect(() => {
-        if (timeLeft == 0){
+        if (timeLeft === 0){
             setStarted(false);
         }
     }, [timeLeft, setStarted]);

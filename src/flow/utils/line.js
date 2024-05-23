@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { BaseEdge, EdgeLabelRenderer, Position, getBezierPath, getStraightPath, useReactFlow } from "reactflow";
+import { BaseEdge, EdgeLabelRenderer } from "reactflow";
 import { selectSectionTrains } from "../../state/selectors";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { trainEntersLine, trainMoves } from "../../state/slice";
-
+/*
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){
         if (sourceY <= targetY){
@@ -33,7 +33,7 @@ const reversePathPosition = (position) => {
             return Position.Bottom;
     }
 }
-
+*/
 export default function Line({
     id,
     sourceX,
@@ -44,8 +44,8 @@ export default function Line({
         color,
         trainPos,
     },
-    sourcePosition,
-    targetPosition,
+    //sourcePosition,
+    //targetPosition,
     style = {},
     markerEnd,
     selected,
@@ -70,7 +70,7 @@ export default function Line({
                 }))
             }
         });
-    }, [sectionTrains]);
+    }, [sectionTrains, dispatch, id, trainPos, ]);
 
     useEffect(() => {
         if (trainPos.length > 0){
@@ -89,7 +89,7 @@ export default function Line({
             }, 10);
         }
         return () => clearInterval(intervalRef.current);
-    }, [sourceX, sourceY, targetX, targetY, id, trainPos]);
+    }, [sourceX, sourceY, targetX, targetY, id, trainPos, dispatch]);
 
     return (
         <>            
