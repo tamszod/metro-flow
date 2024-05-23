@@ -9,7 +9,6 @@ import { startRoundAction } from "../state/logic";
 import { addEdges, buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
 import { calculateRoundTime, selectDay, selectEdges, selectLinesColors, selectNodes } from "../state/selectors";
 import { areaHeight, areaWidth, pace } from "../config";
-import { Button } from "semantic-ui-react";
 
 const proOptions = { hideAttribution: true };
 
@@ -71,8 +70,8 @@ export const Flow = () => {
             <>{timeLeft}s time left</>
                 :
                 <>
-                    <Button content='New Day' primary onClick={event => {start()}}/>
-                    <Button content='Restart' secondary onClick={event => {dispatch(restart())}}/>
+                    <button onClick={event => {start()}}>New Day</button>
+                    <button onClick={event => {dispatch(restart())}}>Restart</button>
                 </>
                 }
             </>

@@ -49,8 +49,8 @@ export default memo((props) => {
 		{Object.entries(lines).map(([line, edges], index) => {
 				if (edges.length === 1){
 					let degree = (Math.atan2(edges[0].data.targetPos.y-edges[0].data.sourcePos.y, edges[0].data.targetPos.x-edges[0].data.sourcePos.x) * 180) / Math.PI;
-					let marginTop = -1;
-					let marginLeft = -5;
+					let marginTop = -1.5;
+					let marginLeft =  -5;
 					if (edges[0].data.targetPos.x === props.xPos && edges[0].data.targetPos.y === props.yPos){
 						degree += 90;
 					} else {
@@ -85,6 +85,20 @@ export default memo((props) => {
 									transform: `rotate(${degree}deg)`,
 								}
 							}>
+								<div
+								style={
+								{ 
+									background: edges[0].data.color,
+									width: "12px",
+									height: "2.1px",
+									borderRadius: 0,
+									transform: `rotate(90deg)`,
+									marginTop: "9px",
+									marginLeft: "4px",
+								}
+							}>
+
+								</div>
 							</Handle>
 						</div>
 				} else {
@@ -106,8 +120,8 @@ export default memo((props) => {
             {
               display: "block",
               fontSize:"5px",
-              marginTop: "-6px",
-              marginLeft:"10px",
+              marginTop: "2px",
+              marginLeft:"12px",
               background: hover ? "red" : "",
               whiteSpace: "nowrap",
             }
@@ -175,26 +189,4 @@ marginTop = -1.5-y+handleY;
 							marginTop = -1.5-y+handleY;
 							marginLeft = -5-x+handleX;
 						}
-					}
-					
-					
-					
-					
-					
-
-								<div
-								style={
-								{ 
-									background: edges[0].data.color,
-									width: "20px",
-									height: "2.2px",
-									borderRadius: 0,
-									transform: `rotate(90deg)`,
-									marginTop: "10px",
-									marginLeft: "-0.9px",
-								}
-							}>
-
-								</div>
-					
-					*/
+					}*/

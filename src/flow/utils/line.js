@@ -93,7 +93,7 @@ export default function Line({
 
     return (
         <>            
-            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{stroke:color ?? "black", strokeWidth:selected ? 4 : 3, ...style}} />
+            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{stroke:color ?? "black", strokeWidth:selected ? 3 : 2, ...style}} />
             {
                 trainPos.map(train => 
                 <EdgeLabelRenderer
