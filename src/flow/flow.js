@@ -6,20 +6,19 @@ import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { startRoundAction } from "../state/logic";
-import { addEdges, buildLine, onEdgesChange, revealStation } from "../state/slice";
-import { calculateRoundTime, selectEdges, selectNodes } from "../state/selectors";
-import { pace } from "../config";
+import { addEdges, buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
+import { calculateRoundTime, selectDay, selectEdges, selectLinesColors, selectNodes } from "../state/selectors";
+import { areaHeight, areaWidth, pace } from "../config";
+import { Button } from "semantic-ui-react";
 
 const proOptions = { hideAttribution: true };
 
 export const Flow = () => {
     const dispatch = useDispatch();
-    const roundTime = useSelector(calculateRoundTime)
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
-    const [round, setRound] = useState(0)
-    const [coords, setCoords] = useState([]);
-    const [unclaimedTiles, setUnclaimedTiles] = useState([{x:0, y:0}]);
+    const round = useSelector(selectDay);
+    const linesColors = useSelector(selectLinesColors);
     const [started, setStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0)
     const intervalRef = useRef();
@@ -56,14 +55,13 @@ export const Flow = () => {
     const start = async () => {
         setStarted(true);
         dispatch(await startRoundAction(setTimeLeft));
-        setRound(r => r + 1);
     }
 
     return (
         <>
-
-<h1>Day {round}</h1>
-            <p>{started && timeLeft === 0 ?
+            <h2>Day {round}</h2>
+            <p 
+                    style={{margin:"5px"}}>{started && timeLeft === 0 ?
             <>Loading</>
             :
             <>
@@ -72,14 +70,17 @@ export const Flow = () => {
             ? 
             <>{timeLeft}s time left</>
                 :
-                <button onClick={event => {start()}}>Start</button>
+                <>
+                    <Button content='New Day' primary onClick={event => {start()}}/>
+                    <Button content='Restart' secondary onClick={event => {dispatch(restart())}}/>
+                </>
                 }
             </>
             }</p>
             <div
                 style={{
-                    width: "95vw",
-                    height: "75vh",
+                    width: "98vw",
+                    height: "74vh",
                 }}
             >
                 <ReactFlowProvider>
@@ -95,6 +96,7 @@ export const Flow = () => {
                         connectionMode={"loose"}
                         onEdgesChange={(e) => dispatch(onEdgesChange(e))}
                         onConnect={(e) => dispatch(buildLine(e))}
+                        defaultViewport={{x:areaWidth*3, y:areaHeight*3, zoom: 1}}
                     >
                     <Controls 
                         showZoom={false}
@@ -102,58 +104,97 @@ export const Flow = () => {
                         showInteractive={false}
                         position="top"
                     >
-                        <ControlButton style={{background:"black"}}
-                        draggable
-                        onClick={() => alert('Something magical just happened. ✨')}>
-                            <SiMetrodeparis style={
-                                {
-                                    color:"yellow",
-                                    background:"black",
-                                }
-                                }/>
-                        </ControlButton>
-                        <ControlButton style={{background:"black"}}
-                        onClick={() => alert('Something magical just happened. ✨')}>
-                            <SiMetrodeparis style={
-                                {
-                                    color:"red",
-                                    background:"black",
-                                }
-                                }/>
-                        </ControlButton>
-                        <ControlButton style={{background:"black"}}
-                        onClick={() => alert('Something magical just happened. ✨')}>
-                            <SiMetrodeparis style={
-                                {
-                                    color:"blue",
-                                    background:"black",
-                                }
-                                }/>
-                        </ControlButton>
-                        <ControlButton style={{background:"black"}}
-                        onClick={() => alert('Something magical just happened. ✨')}>
-                            <SiMetrodeparis style={
-                                {
-                                    color:"green",
-                                    background:"black",
-                                }
-                                }/>
-                        </ControlButton>
-                        <ControlButton style={{background:"black"}}
-                        onClick={() => alert('Something magical just happened. ✨')}
-                                disabled
-                        >
-                            <SiMetrodeparis style={
-                                {
-                                    color:"pink",
-                                    background:"black",
-                                }
-                                }/>
-
-
-
-
-                        </ControlButton>
+                        {
+                            linesColors.includes("yellow") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"yellow",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("red") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"red",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("blue") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"blue",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("green") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"green",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("pink") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"pink",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("black") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"black",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
+                        {
+                            linesColors.includes("orange") ?
+                            <ControlButton style={{background:"white"}}>
+                                <SiMetrodeparis style={
+                                    {
+                                        color:"orange",
+                                        background:"white",
+                                    }
+                                    }/>
+                            </ControlButton>
+                            :
+                            <></>
+                        }
                     </Controls>
                     </ReactFlow>
                 </ReactFlowProvider>

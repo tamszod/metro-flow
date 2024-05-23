@@ -5,28 +5,59 @@ export const areaWidth = 200;
 export const areaHeight = 200;
 export const fixedStationsPerRound = 9;
 
+const initialState = {
+    stations: [], 
+    lines: [],
+    grids: [ 
+        {
+            x:0,
+            y:0
+        }
+    ],
+    gridIndex: 0,
+    futureStations: [],
+    trains: [],
+    round: 0,
+}
+
 const gameSlice = createSlice({
     name: "game",
-    initialState: {
-        stations: [], 
-        lines: [],
-        grids: [ 
-            {
-                x:0,
-                y:0
-            }
-        ],
-        gridIndex: 0,
-        futureStations: [],
-        trains: [],
-        round: 0,
-    },
+    initialState,
     reducers: {
         mutateGame: (state, {payload}) => {
-            return {...state, ...payload}
+            return {...state, ...payload};
+        },
+        restart: (state, {payload}) => {
+            return initialState;
         },
         onEdgesChange: (state, {payload}) => {
-            state.lines = applyEdgeChanges(payload, state.lines);
+            const events = []
+            let trainsToDelete = [] 
+            payload.forEach( event => {
+                if (event.type === "remove"){
+                    const line = state.lines.find(line => line.id === event.id)
+                    const connections = state.lines.filter( conn => ((
+                        line.source === conn.source || 
+                        line.source === conn.target || 
+                        line.target === conn.target || 
+                        line.target === conn.source) && line.data.color === conn.data.color && line.id !== conn.id
+                    ))
+                    if (connections.length === 1 && line.data.trainPos.length === 0){
+                        events.push(event);
+                    } else if (connections.length === 0){
+                        trainsToDelete = [...trainsToDelete, ...line.data.trainPos.map(train => train.id)];
+                        events.push(event);
+                    } else if (connections.length === 2) {
+                        alert("You can't delete sections from the middle of the line!")
+                    }
+                } else {
+                    events.push(event);
+                }
+            })
+            if (events.length > 0){
+                state.lines = applyEdgeChanges(events, state.lines);
+                state.trains = state.trains.filter(train => !trainsToDelete.includes(train.id))
+            }
         },
         buildLine: (state, {payload}) => {
             if (payload.source === payload.target){
@@ -51,6 +82,8 @@ const gameSlice = createSlice({
                             data: {
                                 color: lines[0],
                                 trainPos: [],
+                                sourcePos: state.stations.find(station => station.id===payload.source).position,
+                                targetPos: state.stations.find(station => station.id===payload.target).position,
                             }},
                             state.lines
                         );
@@ -77,6 +110,13 @@ const gameSlice = createSlice({
                     alert("You don't have any unused train lines!")
                 }
             } else {
+                if (state.lines.filter(line => (line.source === payload.source || 
+                    line.source === payload.target || 
+                    line.target === payload.target || 
+                    line.target === payload.source) && line.data.color === payload.sourceHandle).length > 1){
+                        alert("Circular line is not allowed!");
+                        return;
+                    }
                 state.lines = addEdge({
                     ...payload,
                     sourceHandle: "station",
@@ -85,6 +125,8 @@ const gameSlice = createSlice({
                     data: {
                         color: payload.sourceHandle,
                         trainPos: [],
+                        sourcePos: state.stations.find(station => station.id===payload.source).position,
+                        targetPos: state.stations.find(station => station.id===payload.target).position,
                     },},
                     state.lines
                 )
@@ -100,22 +142,7 @@ const gameSlice = createSlice({
                 state.stations = [...state.stations, newStation]
             }
         },
-        shoveTrain: (state, {payload:{sourceX, sourceY, targetX, targetY, id}}) => {
-            const train = state.trains.find(train => train.id === id)
-            const distancePerTick = train.traits.speed / Math.sqrt(((sourceX - targetX)**2 + (sourceY - targetY)**2));
-            if (train.currentPos.distanceFinished < train.currentPos.target){
-                train.currentPos.distanceFinished += distancePerTick;
-                if (train.currentPos.distanceFinished >= 1){
-                    train.currentPos.type="station";
-                }
-            } else {
-                train.currentPos.distanceFinished -= distancePerTick;
-                if (train.currentPos.distanceFinished <= 0.0){
-                    train.currentPos.type="station";
-                }
-            }
-        },
-        trainEntersLineStart: (state, {payload}) => {
+        trainEntersLine: (state, {payload}) => {
             const section = state.lines.find(line => line.id === payload.id)
             section.data.trainPos = [...section.data.trainPos, {
                 id: payload.train_id,
@@ -124,8 +151,8 @@ const gameSlice = createSlice({
 
         },
         trainMoves: (state, {payload:{sourceX, sourceY, targetX, targetY, train_id, line_id}}) => {
-            const train = state.trains.find(train => train.id === train_id)
-            const section = state.lines.find(line => line.id === line_id)
+            const train = state.trains.find(train => train.id === train_id);
+            const section = state.lines.find(line => line.id === line_id);
             const distance = train.traits.speed / Math.sqrt(((sourceX - targetX)**2 + (sourceY - targetY)**2));
             const trainPosOnSection = section.data.trainPos.find(train => train.id === train_id);
             if (train.currentPos.source < train.currentPos.target){
@@ -169,7 +196,7 @@ const gameSlice = createSlice({
 })
 
 //Actions
-export const { mutateGame, onEdgesChange, buildLine, revealStation, shoveTrain, trainEntersLineStart, trainMoves, trainEntersStation } = gameSlice.actions
+export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, trainEntersLine, trainMoves, trainEntersStation } = gameSlice.actions
 
 
 //Reducer

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { areaHeight, areaWidth, cut, pace, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
 import { mutateGame } from "./slice";
 
 const generateNextGrids = (gridIndex, grids) => {
@@ -23,9 +23,11 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
     const grids = JSON.parse(JSON.stringify(game.grids));
     let gridIndex = game.gridIndex;
     const futureStations = JSON.parse(JSON.stringify(game.futureStations));
+    let round = game.round+1;
 
     let stationCount = 0
-    while (futureStations.length < stationsPerRound){
+    const totalStations = stationsPerRound+Math.floor(round/bonusStationsMultiplier);
+    while (futureStations.length < totalStations){
 
         if (grids.length < gridIndex+3){
             generateNextGrids(++gridIndex, grids)
@@ -47,7 +49,7 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
 
     if (stationCount > 0){
         try {
-            const { data:{results} } = await axios.get(`https://randomuser.me/api/?inc=name&results=${stationCount}`);
+            const { data:{results} } = await axios.get(`https://randomuser.me/api/?inc=name&nat=gb,us,es&results=${stationCount}`);
             futureStations.map(station => {
                 station.data = {name:formatStationName(results.pop().name)}
                 return station;
@@ -62,5 +64,5 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
 
     setTime(futureStations.length*pace+roundStartDelay);
 
-    dispatch(mutateGame({grids, gridIndex, futureStations}));
+    dispatch(mutateGame({grids, gridIndex, futureStations, round}));
 }

@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { BaseEdge, EdgeLabelRenderer, Position, getBezierPath, getStraightPath, useReactFlow } from "reactflow";
 import { selectSectionTrains } from "../../state/selectors";
 import { useEffect, useRef, useState } from "react";
-import { reachLine, shoveTrain, trainEntersLineStart, trainMoves, trainProgressesLine, trainReachesLineEnd } from "../../state/slice";
+import { trainEntersLine, trainMoves } from "../../state/slice";
 
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){
@@ -63,7 +63,7 @@ export default function Line({
                 ++index;
             }
             if (index >= trainPos.length){
-                dispatch(trainEntersLineStart({
+                dispatch(trainEntersLine({
                     id:id,
                     train_id: train.id,
                     distance: train.currentPos.source,
@@ -93,7 +93,7 @@ export default function Line({
 
     return (
         <>            
-            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{stroke:color ?? "black", strokeWidth:selected ? 3 : 2, ...style}} />
+            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{stroke:color ?? "black", strokeWidth:selected ? 4 : 3, ...style}} />
             {
                 trainPos.map(train => 
                 <EdgeLabelRenderer
@@ -101,6 +101,7 @@ export default function Line({
                 >
                     <div
                         style={{
+                            zIndex: 1,
                             position: 'absolute',
                             transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px) rotate(${270-Math.atan2((targetX-sourceX),(targetY-sourceY))* (180 / Math.PI)}deg)`,
                             pointerEvents: 'all',
