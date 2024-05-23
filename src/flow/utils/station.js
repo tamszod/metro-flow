@@ -1,11 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from "react";
-import { Handle, Position, useEdges, useUpdateNodeInternals } from "reactflow";
+import React, { memo, useEffect, useState } from "react";
+import { Handle, useEdges } from "reactflow";
 import { selectStationTrains } from "../../state/selectors";
 import { useDispatch, useSelector } from "react-redux";
 import { trainEntersStation } from "../../state/slice";
 
 export default memo((props) => {
-	const updateNodeInternals = useUpdateNodeInternals();
   const trains = useSelector(state => selectStationTrains(state, props.id));
 	const dispatch = useDispatch();
   const [hover, setHover] = useState(false)
@@ -18,7 +17,7 @@ export default memo((props) => {
 					id:train.id
 				}))
 			})
-		}, [trains]
+		}, [trains, dispatch]
 	);
 
 	const lines = {}
