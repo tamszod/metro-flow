@@ -1,13 +1,14 @@
 import React, { memo, useEffect, useState } from "react";
 import { Handle, useEdges } from "reactflow";
-import { selectStationTrains } from "../../state/selectors";
+import { selectStationTrains, selectWaitingPassengersAtStation } from "../../state/selectors";
 import { useDispatch, useSelector } from "react-redux";
 import { trainEntersStation } from "../../state/slice";
 
 export default memo((props) => {
-  const trains = useSelector(state => selectStationTrains(state, props.id));
+  	const trains = useSelector(state => selectStationTrains(state, props.id));
+  	const passengers = useSelector(state => selectWaitingPassengersAtStation(state, props.id));
 	const dispatch = useDispatch();
-  const [hover, setHover] = useState(false)
+	const [hover, setHover] = useState(false)
   	const edges = useEdges();
 
 	useEffect(
@@ -121,11 +122,39 @@ export default memo((props) => {
               fontSize:"5px",
               marginTop: "2px",
               marginLeft:"12px",
-              background: hover ? "red" : "",
+              backgroundColor: hover ? "blue" : "",
               whiteSpace: "nowrap",
             }
           }
         >{props.data.name}</span>
+		{passengers ? <>{hover ?<div
+				style={{
+					fontSize:"8px",
+					width:"150px",
+					backgroundColor:"lightgray",
+					margin:"4px",
+					zIndex:-10
+				}}
+			>
+			<h2 style={{
+				margin:"4px",
+				color: "red",
+			}}>Passengers Are Waiting!</h2>
+			<table><tbody>
+				{
+					Object.values(passengers).map((passenger, index) => (
+						<tr key={index}><td>{passenger.count} to {passenger.name}</td></tr>
+					))
+				}
+			</tbody></table>
+		</div> : <div
+				style={{
+					fontSize:"15px",
+					marginLeft: "-6px",
+					marginTop: "-13px",
+				}}
+		>!
+		</div>}</>:<></>}
       </div>
     );
 });

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
 import { mutateGame } from "./slice";
 
 const generateNextGrids = (gridIndex, grids) => {
@@ -18,10 +18,16 @@ const formatStationName = (raw) => {
     return `${Math.random() < 0.2 ? "St. " : ""}${Math.random() < 0.7 ? `${raw.first} ` : ""}${raw.last}${Math.random() < 0.15 ? "" : ` ${placeIndicators[Math.floor(Math.random(placeIndicators.length)*placeIndicators.length)]}`}`;
 }
 
+const randomizeDestinationForPassenger = (blackListedStationIndex, stations) => {
+    const index = Math.floor(Math.random(stations.length-1)*(stations.length-1));
+    return index < blackListedStationIndex ? stations[index].id : stations[index+1].id;
+}
+
 export const startRoundAction = async (setTime) => async (dispatch, getState) => {
     const game = getState().game;
     const grids = JSON.parse(JSON.stringify(game.grids));
     let gridIndex = game.gridIndex;
+    const stations = JSON.parse(JSON.stringify(game.stations));
     const futureStations = JSON.parse(JSON.stringify(game.futureStations));
     let round = game.round+1;
 
@@ -48,21 +54,39 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
     }
 
     if (stationCount > 0){
+        let stationsNames = [];
         try {
             const { data:{results} } = await axios.get(`https://randomuser.me/api/?inc=name&nat=gb,us,es&results=${stationCount}`);
-            futureStations.map(station => {
-                station.data = {name:formatStationName(results.pop().name)}
-                return station;
-            });
+            stationsNames = results;
         } catch (error){
-            futureStations.map(station => {
-                station.data = {name:"Station At " + station.position.x + " " + station.position.y}
-                return station;
-            });
+            stationsNames = futureStations.map(station => {
+                return {
+                    name : {
+                        first: placeHolderNames[Math.floor(Math.random(placeHolderNames.length)*placeHolderNames.length)],
+                        last: placeHolderNames[Math.floor(Math.random(placeHolderNames.length)*placeHolderNames.length)],
+                    }
+                }
+            })
         }
+        futureStations.map(station => {
+            station.data = {
+                name:formatStationName(stationsNames.pop().name),
+                lifetime: 0,
+                passengers: [],
+            }
+            return station;
+        });
     }
+
+    stations.map((station, stationIndex) => {
+        station.data.lifetime += 1;
+        station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => ({
+            destinationId: randomizeDestinationForPassenger(stationIndex, stations),
+        }))]
+        return station;
+    })
 
     setTime(futureStations.length*pace+roundStartDelay);
 
-    dispatch(mutateGame({grids, gridIndex, futureStations, round}));
+    dispatch(mutateGame({grids, gridIndex, futureStations, round, stations}));
 }
