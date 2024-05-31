@@ -16,7 +16,7 @@ The game currently in alpha so major features are still to come!
 &emsp;» You can see the number of passengers the train currently carrying.<br />
 &emsp;» At the right top corner you can see how many passengers have reached their goal so far.<br />
 <strong>Known issues:</strong><br />
-&emsp;» At stations the end of some lines might be visually bugged.<br />
+&emsp;» At a station the end of some line might be visually bugged.<br />
 &emsp;» Restarting the game results in crash (It will be fixed in Alpha 2.1).<br />
 
 
