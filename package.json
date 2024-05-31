@@ -1,6 +1,6 @@
 {
   "name": "metro-flow",
-  "version": "alpha1.0",
+  "version": "alpha2.1",
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
