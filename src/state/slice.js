@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { addEdge, applyEdgeChanges } from "reactflow";
+import { bfs } from "./utilities/path";
 
 export const areaWidth = 200;
 export const areaHeight = 200;
@@ -8,6 +9,7 @@ export const fixedStationsPerRound = 9;
 const initialState = {
     stations: [], 
     lines: [],
+    transportGraph: {},
     grids: [ 
         {
             x:0,
@@ -18,6 +20,7 @@ const initialState = {
     futureStations: [],
     trains: [],
     round: 0,
+    passengers : 0,
 }
 
 const gameSlice = createSlice({
@@ -55,9 +58,17 @@ const gameSlice = createSlice({
                 }
             })
             if (events.length > 0){
+                events.forEach(event => {
+                    if (event.type === "remove"){
+                        const line = state.lines.find(line => line.id === event.id);
+                        state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
+                        state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                    }
+                })
                 state.lines = applyEdgeChanges(events, state.lines);
                 state.trains = state.trains.filter(train => !trainsToDelete.includes(train.id))
             }
+
         },
         buildLine: (state, {payload}) => {
             if (payload.source === payload.target){
@@ -89,6 +100,9 @@ const gameSlice = createSlice({
                         );
                     state.trains = [...state.trains, {
                         id: state.trains.length,
+                        data : {
+                            passengers : [],
+                        },
                         currentPos: {
                             type: "line", // Train position in the system. (line or station)
                             id: lineId,  // «
@@ -107,7 +121,8 @@ const gameSlice = createSlice({
                     },
                 ]
                 } else {
-                    alert("You don't have any unused train lines!")
+                    alert("You don't have any unused train lines!");
+                    return;
                 }
             } else {
                 if (state.lines.filter(line => (line.source === payload.source || 
@@ -131,6 +146,8 @@ const gameSlice = createSlice({
                     state.lines
                 )
             }
+            state.transportGraph[payload.source].push(payload.target);
+            state.transportGraph[payload.target].push(payload.source);
         },
         revealStation: (state, {payload}) => {
             if (state.futureStations.length > 0){
@@ -140,6 +157,7 @@ const gameSlice = createSlice({
                     ...state.futureStations.pop(),
                 }
                 state.stations = [...state.stations, newStation]
+                state.transportGraph = {...state.transportGraph, [newStation.id] : []};
             }
         },
         trainEntersLine: (state, {payload}) => {
@@ -178,7 +196,6 @@ const gameSlice = createSlice({
         trainEntersStation: (state, {payload:{id}}) => {
             const train = state.trains.find(train => train.id === id && train.currentPos.type === "station");
             const station = state.stations.find(station => station.id === train.currentPos.id);
-            //Handle Passangers...
             let lines = state.lines.filter(line => (line.source === station.id || line.target === station.id) && line.data.color === train.traits.color);
             if (lines.length > 1){
                 lines = lines.filter(line => line.id !== train.lastPos.id);
@@ -189,6 +206,22 @@ const gameSlice = createSlice({
             train.currentPos.id=lines[0].id;
             train.currentPos.source = lines[0].source === station.id ? 0.0 : 1.0;
             train.currentPos.target = train.currentPos.source === 0.0 ? 1.0 : 0.0;
+            const nextStation = lines[0].source === station.id ? lines[0].target : lines[0].source;
+            const passengers = [...train.data.passengers, ...station.data.passengers];
+            train.data.passengers = [];
+            station.data.passengers = [];
+            passengers.forEach(passenger => {
+                if (station.id === passenger.destinationId){
+                    state.passengers += 1;
+                    return;
+                }
+                const travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
+                if (travelPlan && travelPlan[travelPlan.length-2] === nextStation){
+                    train.data.passengers.push(passenger);
+                } else {
+                    station.data.passengers.push(passenger);
+                }
+            })
 
         }, 
     },

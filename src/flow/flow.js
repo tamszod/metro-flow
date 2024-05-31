@@ -7,13 +7,14 @@ import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { startRoundAction } from "../state/logic";
 import { buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
-import { selectDay, selectEdges, selectLinesColors, selectNodes } from "../state/selectors";
+import { selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
 import { areaHeight, areaWidth, pace } from "../config";
 
 const proOptions = { hideAttribution: true };
 
 export const Flow = () => {
     const dispatch = useDispatch();
+    const passengers = useSelector(selectPassengers);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
     const round = useSelector(selectDay);
@@ -57,7 +58,10 @@ export const Flow = () => {
     }
 
     return (
-        <>
+        <div style={{
+            left:0,
+            top:0,
+          }}>
             <h2>Day {round}</h2>
             <p 
                     style={{margin:"5px"}}>{started && timeLeft === 0 ?
@@ -97,6 +101,12 @@ export const Flow = () => {
                         onConnect={(e) => dispatch(buildLine(e))}
                         defaultViewport={{x:areaWidth*3, y:areaHeight*3, zoom: 1}}
                     >
+                        <strong style={{
+                            margin:"50px",
+                        }}>
+                        Passengers: {passengers}
+
+                        </strong>
                     <Controls 
                         showZoom={false}
                         showFitView={false}
@@ -198,6 +208,6 @@ export const Flow = () => {
                     </ReactFlow>
                 </ReactFlowProvider>
             </div>
-        </>
+        </div>
     )
 }
