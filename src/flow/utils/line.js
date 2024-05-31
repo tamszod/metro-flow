@@ -111,8 +111,17 @@ export default function Line({
                         }}
                         className="nodrag nopan"
                     >
-                        {sectionTrains.find(train_ => train_.id === train.id) ? (sectionTrains.find(train_ => train_.id === train.id).data.passengers.length) : 0}
                     </div>
+                    <span
+                        style={{
+                            zIndex: 2,
+                            position: "absolute",
+                            fontSize: "15px",
+                            transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px)`,
+                    }}>
+                        {(sectionTrains.find(train_ => train_.id === train.id)?.data.passengers.length)}
+
+                    </span>
                 </EdgeLabelRenderer>
                 )
             }

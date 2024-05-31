@@ -1,10 +1,10 @@
-export const stationsPerRound = 5;
+export const stationsPerRound = 4;
 export const bonusStationsMultiplier = 5; // After given days finished the generated stations number is increased by 1!
 export const areaWidth = 100;
 export const areaHeight = 100;
 export const cut = 25;
-export const pace = 1;
-export const roundStartDelay = 0;
+export const pace = 10;
+export const roundStartDelay = 4;
 export const placeIndicators = [
     "Square", "Park", "Churchyard", "Street", "Riverside",
     "Alley", "Gardens", "Way", "Canal", "Beach", "Point", 
