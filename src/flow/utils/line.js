@@ -111,6 +111,7 @@ export default function Line({
                         }}
                         className="nodrag nopan"
                     >
+                        {sectionTrains.find(train_ => train_.id === train.id) ? (sectionTrains.find(train_ => train_.id === train.id).data.passengers.length) : 0}
                     </div>
                 </EdgeLabelRenderer>
                 )

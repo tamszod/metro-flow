@@ -3,6 +3,7 @@ import { pace } from "../config";
 
 export const selectNodes = (state) => state.game.stations; // TO BE REPLACED SOLELY BY selectStations
 
+export const selectPassengers = (state) => state.game.passengers;
 export const selectStations = (state) => state.game.stations;
 export const selectStation = createSelector(
     [
