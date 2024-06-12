@@ -100,6 +100,8 @@ export const Flow = () => {
                         onEdgesChange={(e) => dispatch(onEdgesChange(e))}
                         onConnect={(e) => dispatch(buildLine(e))}
                         defaultViewport={{x:areaWidth*3, y:areaHeight*3, zoom: 1}}
+                        disableKeyboardA11y={false}
+                        deleteKeyCode={null}
                     >
                         <strong style={{
                             margin:"50px",

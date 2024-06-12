@@ -6,7 +6,7 @@ function App() {
       left:0,
       top:0,
     }}>
-      <h1>Metro Flow (Alpha 2.0)</h1>
+      <h1>Metro Flow (Alpha 2.1)</h1>
       <Flow />
     </div>
   );
