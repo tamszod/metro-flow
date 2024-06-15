@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { addEdge, applyEdgeChanges } from "reactflow";
 import { bfs } from "./utilities/path";
+import { hashObject } from "./utilities/hash";
 
 export const areaWidth = 200;
 export const areaHeight = 200;
@@ -10,6 +11,7 @@ const initialState = {
     stations: [], 
     lines: [],
     transportGraph: {},
+    transportGraphHash: "null",
     grids: [ 
         {
             x:0,
@@ -43,6 +45,7 @@ const gameSlice = createSlice({
             if (i >= state.trains.length){
                 state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
                 state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                state.transportGraphHash = hashObject(state.transportGraph);
                 state.lines = [
                     ...state.lines.slice(0, lineIndex),
                     ...state.lines.slice(lineIndex + 1)
@@ -65,6 +68,7 @@ const gameSlice = createSlice({
                         state.trains = state.trains.filter(train => !train_ids.includes(train.id));
                         state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
                         state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                        state.transportGraphHash = hashObject(state.transportGraph);
                         state.lines = [
                             ...state.lines.slice(0, lineIndex),
                             ...state.lines.slice(lineIndex + 1)
@@ -117,6 +121,7 @@ const gameSlice = createSlice({
                         const line = state.lines.find(line => line.id === event.id);
                         state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
                         state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                        state.transportGraphHash = hashObject(state.transportGraph);
                     }
                 })
                 state.lines = applyEdgeChanges(events, state.lines);
@@ -208,6 +213,7 @@ const gameSlice = createSlice({
             }
             state.transportGraph[payload.source].push(payload.target);
             state.transportGraph[payload.target].push(payload.source);
+            state.transportGraphHash = hashObject(state.transportGraph);
         },
         revealStation: (state, {payload}) => {
             if (state.futureStations.length > 0){
@@ -218,6 +224,7 @@ const gameSlice = createSlice({
                 }
                 state.stations = [...state.stations, newStation]
                 state.transportGraph = {...state.transportGraph, [newStation.id] : []};
+                state.transportGraphHash = hashObject(state.transportGraph);
             }
         },
         trainEntersLine: (state, {payload}) => {
@@ -275,10 +282,19 @@ const gameSlice = createSlice({
                     state.passengers += 1;
                     return;
                 }
-                const travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
-                if (travelPlan && travelPlan[travelPlan.length-2] === nextStation){
+                if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                    passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
                     train.data.passengers.push(passenger);
                 } else {
+                    if (passenger.hash !== state.transportGraphHash){
+                        passenger.travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
+                        passenger.hash = state.transportGraphHash;
+                        if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                            passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
+                            train.data.passengers.push(passenger);
+                            return;
+                        } 
+                    }
                     station.data.passengers.push(passenger);
                 }
             })

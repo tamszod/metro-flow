@@ -3,7 +3,6 @@ import { BaseEdge, EdgeLabelRenderer } from "reactflow";
 import { selectSectionTrains } from "../../state/selectors";
 import { useEffect, useRef } from "react";
 import { deleteLine, trainEntersLine, trainMoves } from "../../state/slice";
-import { trainColor, trainDeleteColor } from "../../config";
 /*
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){
@@ -97,7 +96,7 @@ export default function Line({
         if (isDeleting){
             dispatch(deleteLine(id))
         }
-    }, [isDeleting, dispatch])
+    }, [isDeleting, id, dispatch])
 
     return (
         <>            
