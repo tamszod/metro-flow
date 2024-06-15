@@ -7,6 +7,18 @@ A small web game created using ReactFlow and Redux. The goal is to satisfy deman
 
 The game currently in alpha so major features are still to come!
 
+# Alpha 2.1 (2024.06.15)
+<strong>Quality of Life:</strong><br />
+&emsp;» Redesigned the line section deletion system. Now lines can be deleted on touch devices.<br />
+&emsp;» In order to delete a line, you have to connect the end of it into itself. It will be mark for deletion. If a line is being used it will stay up till the trains leave it.<br />
+<strong>Bug Fixes:</strong><br />
+&emsp;» Improved performace on path finding.<br />
+&emsp;» Restarting the game resulting in crash has been fixed.<br />
+&emsp;» End of line should be visually correct.<br />
+<strong>Known issues:</strong><br />
+&emsp;» At a station the end of some line might be visually bugged.<br />
+
+
 # Alpha 2.0 - The Passenger Update (2024.05.31)
 <img width="500" alt="Alpha 2.0 Metro-Flow" src="https://github.com/tamszod/metro-flow/assets/126774257/448345e4-ffcc-4c2e-813f-9101acb36a13"><br />
 &emsp;» Each revealed station will spawn passengers at the start of the round depending on how many days it has been revealed.<br />
