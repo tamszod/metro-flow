@@ -57,7 +57,52 @@ export default memo((props) => {
 						degree += 270;
 					}
 
-					return <div
+					return edges[0].data.isDeleting ? <div
+					key={index} 
+					style={
+						{
+							display:"flow",
+							zIndex: 2,
+						}
+					}
+					>
+						<Handle
+						id={line}
+						isConnectable={false}
+						style={
+							{ 
+								position: "absolute",
+								background: "gray",
+								zIndex: -1,
+								width: "20px",
+								height: "1px",
+								borderRadius: 0,
+								left: 0,
+								right: 0,
+								top:0,
+								bottom:0,
+								marginTop: `${marginTop}px`,
+								marginLeft: `${marginLeft}px`,
+								transform: `rotate(${degree}deg)`,
+							}
+						}>
+							{/*<div
+							style={
+							{ 
+								background: edges[0].data.color,
+								width: "12px",
+								height: "2.1px",
+								borderRadius: 0,
+								transform: `rotate(90deg)`,
+								marginTop: "9px",
+								marginLeft: "4px",
+							}
+						}
+						>
+
+							</div>*/}
+						</Handle>
+					</div> : <div
 						key={index} 
 						style={
 							{
@@ -85,7 +130,7 @@ export default memo((props) => {
 									transform: `rotate(${degree}deg)`,
 								}
 							}>
-								<div
+								{/*<div
 								style={
 								{ 
 									background: edges[0].data.color,
@@ -96,9 +141,10 @@ export default memo((props) => {
 									marginTop: "9px",
 									marginLeft: "4px",
 								}
-							}>
+							}
+							>
 
-								</div>
+								</div>*/}
 							</Handle>
 						</div>
 				} else {

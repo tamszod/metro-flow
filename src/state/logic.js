@@ -1,6 +1,8 @@
 import axios from "axios";
 import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
 import { mutateGame } from "./slice";
+import { bfs } from "./utilities/path";
+import { hashObject } from "./utilities/hash";
 
 const generateNextGrids = (gridIndex, grids) => {
     for(let index = -gridIndex+1; index < gridIndex; ++index){
@@ -29,6 +31,7 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
     let gridIndex = game.gridIndex;
     const stations = JSON.parse(JSON.stringify(game.stations));
     const futureStations = JSON.parse(JSON.stringify(game.futureStations));
+    const transportGraph = game.transportGraph;
     let round = game.round+1;
 
     let stationCount = 0
@@ -80,9 +83,16 @@ export const startRoundAction = async (setTime) => async (dispatch, getState) =>
 
     stations.map((station, stationIndex) => {
         station.data.lifetime += 1;
-        station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => ({
-            destinationId: randomizeDestinationForPassenger(stationIndex, stations),
-        }))]
+        station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => {
+            const destinationId = randomizeDestinationForPassenger(stationIndex, stations);
+            const travelPlan = bfs(transportGraph, destinationId, station.id);
+            const hash = hashObject(transportGraph);
+            return {
+                destinationId,
+                travelPlan,
+                hash,
+            }
+        })]
         return station;
     })
 

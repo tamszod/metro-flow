@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { addEdge, applyEdgeChanges } from "reactflow";
 import { bfs } from "./utilities/path";
+import { hashObject } from "./utilities/hash";
 
 export const areaWidth = 200;
 export const areaHeight = 200;
@@ -10,6 +11,7 @@ const initialState = {
     stations: [], 
     lines: [],
     transportGraph: {},
+    transportGraphHash: "null",
     grids: [ 
         {
             x:0,
@@ -32,6 +34,62 @@ const gameSlice = createSlice({
         },
         restart: (state, {payload}) => {
             return initialState;
+        },
+        deleteLine: (state, {payload:id}) => {
+            let i = 0;
+            while ( i < state.trains.length && ( state.trains[i].currentPos.type !== "line" || state.trains[i].currentPos.id !== id )){
+                i++;
+            }
+            const lineIndex = state.lines.findIndex(line => line.id === id);
+            const line = state.lines[lineIndex];
+            if (i >= state.trains.length){
+                state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
+                state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                state.transportGraphHash = hashObject(state.transportGraph);
+                state.lines = [
+                    ...state.lines.slice(0, lineIndex),
+                    ...state.lines.slice(lineIndex + 1)
+                ]
+            } else {
+                i = 0;
+                while (i < state.lines.length && ( state.lines[i].data.color !== line.data.color || state.lines[i].id === id ) ){
+                    i++;
+                }
+                if (i >= state.lines.length){
+                    i = 0;
+                    const train_ids = [];
+                    while ( i < state.trains.length && ( state.trains[i].traits.color !== line.data.color || state.trains[i].data.passengers.length === 0 )){
+                        if (state.trains[i].traits.color === line.data.color){
+                            train_ids.push(state.trains[i].id);
+                        }
+                        i++;
+                    }
+                    if (i >= state.trains.length){
+                        state.trains = state.trains.filter(train => !train_ids.includes(train.id));
+                        state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
+                        state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                        state.transportGraphHash = hashObject(state.transportGraph);
+                        state.lines = [
+                            ...state.lines.slice(0, lineIndex),
+                            ...state.lines.slice(lineIndex + 1)
+                        ]
+                    }
+                }
+            }
+            /*
+            const lineTrains = state.trains.filter(train => train.currentPos.type==="line" && train.currentPos.id === id);
+            if (lineTrains.length === 0){
+                
+            }
+            const lines = [];
+            const index = 0;
+            while  (lines.length < 2 && index < state.lines.length){
+                if (state.lines[index].data.color){
+
+                }
+                i++;
+            }
+            */
         },
         onEdgesChange: (state, {payload}) => {
             const events = []
@@ -63,6 +121,7 @@ const gameSlice = createSlice({
                         const line = state.lines.find(line => line.id === event.id);
                         state.transportGraph[line.source] = state.transportGraph[line.source].filter(edge => edge !== line.target);
                         state.transportGraph[line.target] = state.transportGraph[line.target].filter(edge => edge !== line.source);
+                        state.transportGraphHash = hashObject(state.transportGraph);
                     }
                 })
                 state.lines = applyEdgeChanges(events, state.lines);
@@ -71,9 +130,13 @@ const gameSlice = createSlice({
 
         },
         buildLine: (state, {payload}) => {
+            // Remove the last section of a line if it is connectected to itself.
             if (payload.source === payload.target){
+                const lineToDelete = state.lines.find(line => line.data.color === payload.sourceHandle && (line.target === payload.source || line.source === payload.source));
+                lineToDelete.data.isDeleting = true;
                 return;
             }
+            //
             if (payload.sourceHandle === "station"){
                 const lines = ["yellow", "red", "blue", "green", "pink", "black", "orange"]
                 state.lines.forEach(edge => {
@@ -92,6 +155,7 @@ const gameSlice = createSlice({
                             type: "line",
                             data: {
                                 color: lines[0],
+                                isDeleting: false,
                                 trainPos: [],
                                 sourcePos: state.stations.find(station => station.id===payload.source).position,
                                 targetPos: state.stations.find(station => station.id===payload.target).position,
@@ -139,6 +203,7 @@ const gameSlice = createSlice({
                     type: "line",
                     data: {
                         color: payload.sourceHandle,
+                        isDeleting: false,
                         trainPos: [],
                         sourcePos: state.stations.find(station => station.id===payload.source).position,
                         targetPos: state.stations.find(station => station.id===payload.target).position,
@@ -148,6 +213,7 @@ const gameSlice = createSlice({
             }
             state.transportGraph[payload.source].push(payload.target);
             state.transportGraph[payload.target].push(payload.source);
+            state.transportGraphHash = hashObject(state.transportGraph);
         },
         revealStation: (state, {payload}) => {
             if (state.futureStations.length > 0){
@@ -158,6 +224,7 @@ const gameSlice = createSlice({
                 }
                 state.stations = [...state.stations, newStation]
                 state.transportGraph = {...state.transportGraph, [newStation.id] : []};
+                state.transportGraphHash = hashObject(state.transportGraph);
             }
         },
         trainEntersLine: (state, {payload}) => {
@@ -215,10 +282,19 @@ const gameSlice = createSlice({
                     state.passengers += 1;
                     return;
                 }
-                const travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
-                if (travelPlan && travelPlan[travelPlan.length-2] === nextStation){
+                if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                    passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
                     train.data.passengers.push(passenger);
                 } else {
+                    if (passenger.hash !== state.transportGraphHash){
+                        passenger.travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
+                        passenger.hash = state.transportGraphHash;
+                        if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                            passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
+                            train.data.passengers.push(passenger);
+                            return;
+                        } 
+                    }
                     station.data.passengers.push(passenger);
                 }
             })
@@ -229,7 +305,8 @@ const gameSlice = createSlice({
 })
 
 //Actions
-export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, trainEntersLine, trainMoves, trainEntersStation } = gameSlice.actions
+export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, 
+    trainEntersLine, trainMoves, trainEntersStation, deleteLine } = gameSlice.actions
 
 
 //Reducer

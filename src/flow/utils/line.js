@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { BaseEdge, EdgeLabelRenderer } from "reactflow";
 import { selectSectionTrains } from "../../state/selectors";
 import { useEffect, useRef } from "react";
-import { trainEntersLine, trainMoves } from "../../state/slice";
+import { deleteLine, trainEntersLine, trainMoves } from "../../state/slice";
 /*
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){
@@ -42,6 +42,7 @@ export default function Line({
     targetY,
     data: {
         color,
+        isDeleting,
         trainPos,
     },
     //sourcePosition,
@@ -91,9 +92,15 @@ export default function Line({
         return () => clearInterval(intervalRef.current);
     }, [sourceX, sourceY, targetX, targetY, id, trainPos, dispatch]);
 
+    useEffect(() => {
+        if (isDeleting){
+            dispatch(deleteLine(id))
+        }
+    }, [isDeleting, id, dispatch])
+
     return (
         <>            
-            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{stroke:color ?? "black", strokeWidth:selected ? 3 : 2, ...style}} />
+            <BaseEdge path={`M ${sourceX},${sourceY}, ${targetX},${targetY}`} markerEnd={markerEnd} style={{border: "3px black solid", stroke: (isDeleting ? "gray" : color ?? "gray"), strokeWidth:selected ? 3 : 2, ...style}} />
             {
                 trainPos.map(train => 
                 <EdgeLabelRenderer

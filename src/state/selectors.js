@@ -59,7 +59,7 @@ export const selectWaitingPassengersAtStation = createSelector(
 
     ], (station, stations) => {
         const waitingPassengersByStation = {};
-        station.data.passengers.forEach(passenger => {
+        station?.data.passengers.forEach(passenger => {
             if (passenger.destinationId in waitingPassengersByStation){
                 waitingPassengersByStation[passenger.destinationId].count += 1;
             } else {
