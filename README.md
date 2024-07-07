@@ -15,8 +15,6 @@ The game currently in alpha so major features are still to come!
 &emsp;» Improved performace on path finding.<br />
 &emsp;» Restarting the game resulting in crash has been fixed.<br />
 &emsp;» End of line should be visually correct.<br />
-<strong>Known issues:</strong><br />
-&emsp;» At a station the end of some line might be visually bugged.<br />
 
 
 # Alpha 2.0 - The Passenger Update (2024.05.31)
