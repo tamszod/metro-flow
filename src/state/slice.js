@@ -2,9 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { addEdge, applyEdgeChanges } from "reactflow";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
+import { formatStationName, nextGrids, randomizeDestinationForPassenger } from "./logic";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, placeHolderNames, stationsPerRound } from "../config";
 
-export const areaWidth = 200;
-export const areaHeight = 200;
 export const fixedStationsPerRound = 9;
 
 const initialState = {
@@ -76,20 +76,6 @@ const gameSlice = createSlice({
                     }
                 }
             }
-            /*
-            const lineTrains = state.trains.filter(train => train.currentPos.type==="line" && train.currentPos.id === id);
-            if (lineTrains.length === 0){
-                
-            }
-            const lines = [];
-            const index = 0;
-            while  (lines.length < 2 && index < state.lines.length){
-                if (state.lines[index].data.color){
-
-                }
-                i++;
-            }
-            */
         },
         onEdgesChange: (state, {payload}) => {
             const events = []
@@ -156,7 +142,12 @@ const gameSlice = createSlice({
                             data: {
                                 color: lines[0],
                                 isDeleting: false,
-                                trainPos: [],
+                                trainPos: [
+                                    {
+                                        id: state.trains.length,
+                                        distance: 0.0,
+                                    }
+                                ],
                                 sourcePos: state.stations.find(station => station.id===payload.source).position,
                                 targetPos: state.stations.find(station => station.id===payload.target).position,
                             }},
@@ -211,8 +202,8 @@ const gameSlice = createSlice({
                     state.lines
                 )
             }
-            state.transportGraph[payload.source].push(payload.target);
-            state.transportGraph[payload.target].push(payload.source);
+            state.transportGraph[payload.source] = [...state.transportGraph[payload.source], payload.target];
+            state.transportGraph[payload.target] = [...state.transportGraph[payload.target], payload.source];
             state.transportGraphHash = hashObject(state.transportGraph);
         },
         revealStation: (state, {payload}) => {
@@ -235,10 +226,10 @@ const gameSlice = createSlice({
             }]
 
         },
-        trainMoves: (state, {payload:{sourceX, sourceY, targetX, targetY, train_id, line_id}}) => {
+        trainMoves: (state, {payload:{train_id}}) => {
             const train = state.trains.find(train => train.id === train_id);
-            const section = state.lines.find(line => line.id === line_id);
-            const distance = train.traits.speed / Math.sqrt(((sourceX - targetX)**2 + (sourceY - targetY)**2));
+            const section = state.lines.find(line => line.id === train.currentPos.id);
+            const distance = train.traits.speed / Math.sqrt(((section.data.sourcePos.x - section.data.targetPos.x)**2 + (section.data.sourcePos.y - section.data.targetPos.y)**2));
             const trainPosOnSection = section.data.trainPos.find(train => train.id === train_id);
             if (train.currentPos.source < train.currentPos.target){
                 trainPosOnSection.distance += distance;
@@ -297,17 +288,180 @@ const gameSlice = createSlice({
                     }
                     station.data.passengers.push(passenger);
                 }
-            })
+            });
+        },
+        nextFrame: (state) =>  {
+            //let trains = JSON.parse(JSON.stringify(game.trains));
+            //let lines = JSON.parse(JSON.stringify(game.lines));
+            //let stations = JSON.parse(JSON.stringify(game.stations));
+            //let passengers = JSON.parse(JSON.stringify(game.passengers));
+            //const transportGraph = game.transportGraph;
+            //const transportGraphHash = game.transportGraphHash;
+            state.trains = state.trains.map(train => {
+                if (train.currentPos.type === "station"){
+                    const station = state.stations.find(station => station.id === train.currentPos.id);
+                    let lines = state.lines.filter(line => (line.source === station.id || line.target === station.id) && line.data.color === train.traits.color);
+                    let line = null;
+                    if (lines.length > 1 && lines[1].id !== train.lastPos.id){
+                        line = lines[1];
+                    } else {
+                        line = lines[0];
+                    }
+                    train.lastPos.type = train.currentPos.type;
+                    train.lastPos.id = train.currentPos.id;
+                    train.currentPos.type = "line";
+                    train.currentPos.id = line.id;
+                    if (line.source === station.id){
+                        train.currentPos.source = 0.0;
+                        train.currentPos.target = 1.0;
+                    } else {
+                        train.currentPos.source = 1.0;
+                        train.currentPos.target = 0.0;
+                    }
+                    line.data.trainPos = [...line.data.trainPos, {
+                        id: train.id,
+                        distance: train.currentPos.source,
+                    }];
+                    const nextStation = lines[0].source === station.id ? lines[0].target : lines[0].source;
+                    const passengers = [...train.data.passengers, ...station.data.passengers];
+                    train.data.passengers = [];
+                    station.data.passengers = [];
+                    passengers.forEach(passenger => {
+                        if (station.id === passenger.destinationId){
+                            state.passengers += 1;
+                            return;
+                        }
+                        if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                            passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
+                            train.data.passengers.push(passenger);
+                        } else {
+                            if (passenger.hash !== state.transportGraphHash){
+                                passenger.travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
+                                passenger.hash = state.transportGraphHash;
+                                if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
+                                    passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
+                                    train.data.passengers.push(passenger);
+                                    return;
+                                } 
+                            }
+                            station.data.passengers.push(passenger);
+                        }
+                    });
+                } else if (train.currentPos.type === "line"){
+                    const line = state.lines.find(line => line.id === train.currentPos.id);
+                    const distance = train.traits.speed / Math.sqrt(((line.data.sourcePos.x - line.data.targetPos.x)**2 + (line.data.sourcePos.y - line.data.targetPos.y)**2));
+                    const trainPosOnSection = line.data.trainPos.find(pos => pos.id === train.id);
+                    if (train.currentPos.source < train.currentPos.target){
+                        trainPosOnSection.distance += distance;
+                        if (trainPosOnSection.distance >= 1){
+                            train.lastPos.type=train.currentPos.type;
+                            train.lastPos.id=train.currentPos.id;
+                            train.currentPos.type="station";
+                            train.currentPos.id=line.target;
+                            line.data.trainPos = line.data.trainPos.filter(pos => pos.id!== train.id);
+                        }
+                    } else {
+                        trainPosOnSection.distance -= distance;
+                        if (trainPosOnSection.distance <= 0.0){
+                            train.lastPos.type=train.currentPos.type;
+                            train.lastPos.id=train.currentPos.id;
+                            train.currentPos.type="station";
+                            train.currentPos.id=line.source;
+                            line.data.trainPos = line.data.trainPos.filter(pos => pos.id!== train.id);
+                        }
+                    }
+                }
+                return train;
+            });
+        },
+        nextRound: (state) => {
 
-        }, 
+            state.round = state.round + 1;
+            let stationCount = 0
+            const totalStations = stationsPerRound+Math.floor(state.round/bonusStationsMultiplier) + state.futureStations.length;
+            const newFutureStations = [];
+            while (newFutureStations.length < totalStations){
+                if (state.grids.length < state.gridIndex+3){
+                    state.gridIndex = state.gridIndex + 1;
+                    state.grids = [...state.grids, ...nextGrids(state.gridIndex)]
+                }
+
+                const grid = state.grids.splice((Math.floor(Math.random(state.grids.length)*state.grids.length)), 1)[0];
+                const minX = grid.x * areaWidth + cut;
+                const maxX= grid.x * areaWidth + areaWidth - cut;
+                const minY = grid.y * areaHeight + cut;
+                const maxY = grid.y * areaHeight + areaHeight - cut;
+
+                const position = {
+                    x: Math.floor(Math.random() * (maxX - minX) + minX),
+                    y: Math.floor(Math.random() * (maxY - minY) + minY),
+                }
+                newFutureStations.push({position:position});
+                stationCount += 1;
+            }
+
+
+            if (stationCount > 0){
+                let stationsNames = [];
+                //try {
+                //   const { data:{results} } = await axios.get(`https://randomuser.me/api/?inc=name&nat=gb,us,es&results=${stationCount}`);
+                //    stationsNames = results;
+                //} catch (error){
+                    stationsNames = newFutureStations.map(station => {
+                        return {
+                            name : {
+                                first: placeHolderNames[Math.floor(Math.random(placeHolderNames.length)*placeHolderNames.length)],
+                                last: placeHolderNames[Math.floor(Math.random(placeHolderNames.length)*placeHolderNames.length)],
+                            }
+                        }
+                    })
+                //}
+                newFutureStations.map(station => {
+                    station.data = {
+                        name:formatStationName(stationsNames.pop().name),
+                        lifetime: 0,
+                        passengers: [],
+                    }
+                    return station;
+                });
+            }
+
+            state.futureStations = [...state.futureStations, ...newFutureStations];
+
+            state.stations = state.stations.map((station, stationIndex) => {
+                station.data.lifetime += 1;
+                station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => {
+                    const destinationId = randomizeDestinationForPassenger(stationIndex, state.stations);
+                    console.log("bfs")
+                    const travelPlan = bfs(state.transportGraph, destinationId, station.id);
+                    console.log("bfs succeded")
+                    const hash = hashObject(state.transportGraph);
+                    return {
+                        destinationId,
+                        travelPlan,
+                        hash,
+                    }
+                })]
+                return station;
+            });
+        },
     },
     extraReducers: builder => {},
 })
 
 //Actions
-export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, 
-    trainEntersLine, trainMoves, trainEntersStation, deleteLine } = gameSlice.actions
+export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, nextRound,
+    trainEntersLine, trainMoves, trainEntersStation, deleteLine, nextFrame } = gameSlice.actions
 
 
 //Reducer
 export const gameReducer = gameSlice.reducer;
+
+/*{
+            const {trains, lines, stations, passengers} = getNextFrame(state);
+            state.trains = trains;
+            state.lines = lines;
+            state.stations = stations;
+            state.passengers = passengers;
+        }*/
+       

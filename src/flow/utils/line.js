@@ -53,10 +53,10 @@ export default function Line({
   }) {
     const dispatch = useDispatch();
     const sectionTrains = useSelector(state => selectSectionTrains(state, id));
-    const intervalRef = useRef();
+    //const intervalRef = useRef();
 
 
-
+/*
     useEffect(() => {
         sectionTrains.forEach(train => {
             let index = 0;
@@ -78,20 +78,14 @@ export default function Line({
             intervalRef.current = setInterval(() => {
                 trainPos.forEach(train => {            
                     dispatch(trainMoves({
-                        sourceX,
-                        sourceY,
-                        targetX,
-                        targetY,
-                        line_id: id,
                         train_id: train.id,
-
                     }))
                 });
             }, 10);
         }
         return () => clearInterval(intervalRef.current);
     }, [sourceX, sourceY, targetX, targetY, id, trainPos, dispatch]);
-
+*/
     useEffect(() => {
         if (isDeleting){
             dispatch(deleteLine(id))

@@ -18,6 +18,7 @@ export const selectEdges = (state) => state.game.lines;
 export const selectDay = (state) => state.game.round;
 export const selectTrains = (state) => state.game.trains;
 export const calculateRoundTime = (state) => state.game.futureStations.length * pace + 1;
+export const iFutureStationCount = (state) => state.game.futureStations.length;
 
 export const selectSectionTrains = createSelector(
     [

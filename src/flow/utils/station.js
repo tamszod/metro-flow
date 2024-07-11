@@ -10,7 +10,7 @@ export default memo((props) => {
 	const dispatch = useDispatch();
 	const [hover, setHover] = useState(false)
   	const edges = useEdges();
-
+/*
 	useEffect(
 		() => {
 			trains.forEach(train => {
@@ -20,6 +20,7 @@ export default memo((props) => {
 			})
 		}, [trains, dispatch]
 	);
+*/
 
 	const lines = {}
 	edges.forEach(edge => {
@@ -31,7 +32,6 @@ export default memo((props) => {
       }
 		}
 	});
-
     return (
       <div
         style={{

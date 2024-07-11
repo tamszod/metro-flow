@@ -5,15 +5,16 @@ import Line from "./utils/line";
 import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { startRoundAction } from "../state/logic";
-import { buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
-import { selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
-import { areaHeight, areaWidth, pace } from "../config";
+import { nextFrameAction, nextRoundAction, startRoundAction } from "../state/logic";
+import { buildLine, nextFrame, nextRound, onEdgesChange, restart, revealStation } from "../state/slice";
+import { iFutureStationCount, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
+import { areaHeight, areaWidth, pace, roundStartDelay } from "../config";
 
 const proOptions = { hideAttribution: true };
 
 export const Flow = () => {
     const dispatch = useDispatch();
+    const futureStationsCount = useSelector(iFutureStationCount);
     const passengers = useSelector(selectPassengers);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
@@ -22,6 +23,7 @@ export const Flow = () => {
     const [started, setStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0)
     const intervalRef = useRef();
+    const gameLoopTimer = useRef();
     //const { setViewport, zoomIn, zoomOut } = useReactFlow();
     //const [x, setX] = useState(200);
     //const [y, setY] = useState(200);
@@ -44,6 +46,15 @@ export const Flow = () => {
     }, [timeLeft, started, dispatch]);
 
     useEffect(() => {
+        if (started){
+            gameLoopTimer.current = setInterval(() => {
+                dispatch(nextFrame());
+            }, 20);
+            return () => clearInterval(gameLoopTimer.current);
+        }
+    }, [timeLeft, started, dispatch]);
+
+    useEffect(() => {
         if (timeLeft === 0){
             setStarted(false);
         }
@@ -54,7 +65,7 @@ export const Flow = () => {
 
     const start = async () => {
         setStarted(true);
-        dispatch(await startRoundAction(setTimeLeft));
+        dispatch(nextRoundAction(setTimeLeft));
     }
 
     return (
