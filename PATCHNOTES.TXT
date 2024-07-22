@@ -1,9 +1,10 @@
-Performance:
-    - Decreased lag while playing. All trains should be synchronised to each other in each frame.
-
 Gameplay:
     - The trains will only move when the day is going.
     - The round timer has been increased as an adjustment to the train changes.
 
+Performance:
+    - Decreased lag while playing. All trains should be synchronised to each other in each frame.
+
 Bugfixes:
-    - Fixed random app freeze at the start of the day or mid game when a train enters a station.
+    - Fixed app freeze at the start of a new day or mid game when a train enters a station. It was caused by circular routes resulting the pathfinder entering into an infinite loop at some cases.
+    - Fixed an issue where trains were invisible when stopping at stations.

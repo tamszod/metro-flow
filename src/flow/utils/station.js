@@ -86,21 +86,6 @@ export default memo((props) => {
 								transform: `rotate(${degree}deg)`,
 							}
 						}>
-							{/*<div
-							style={
-							{ 
-								background: edges[0].data.color,
-								width: "12px",
-								height: "2.1px",
-								borderRadius: 0,
-								transform: `rotate(90deg)`,
-								marginTop: "9px",
-								marginLeft: "4px",
-							}
-						}
-						>
-
-							</div>*/}
 						</Handle>
 					</div> : <div
 						key={index} 
@@ -151,6 +136,35 @@ export default memo((props) => {
 					return <React.Fragment key={index}></React.Fragment>
 				}
 			})
+		}
+		{
+			trains.map((train, index) => (
+				<React.Fragment key={index}>
+					<div
+                        style={{
+                            zIndex: 1,
+                            position: 'absolute',
+                            //transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px) rotate(${train.translateDeg}deg)`,
+                            transform: `translate(-25%, -40%) rotate(${train.lastPos.data.translateDeg}deg)`,
+							pointerEvents: 'all',
+                            width:"20px",
+                            height:"10px",
+                            background:train.traits.color,
+                        }}
+                        className="nodrag nopan"
+                    >
+                    </div>
+                    <span
+                        style={{
+                            zIndex: 2,
+                            position: "absolute",
+                            fontSize: "15px",
+							transform: `translate(0%, -50%)`,
+	                    }}>
+                        {/*train.data.passengers.length*/}
+                    </span>
+				</React.Fragment>
+			))
 		}
         <Handle 
             id={"station"}

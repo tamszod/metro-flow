@@ -53,44 +53,12 @@ export default function Line({
   }) {
     const dispatch = useDispatch();
     const sectionTrains = useSelector(state => selectSectionTrains(state, id));
-    //const intervalRef = useRef();
-
-
-/*
-    useEffect(() => {
-        sectionTrains.forEach(train => {
-            let index = 0;
-            while (index < trainPos.length && trainPos[index].id !== train.id ){
-                ++index;
-            }
-            if (index >= trainPos.length){
-                dispatch(trainEntersLine({
-                    id:id,
-                    train_id: train.id,
-                    distance: train.currentPos.source,
-                }))
-            }
-        });
-    }, [sectionTrains, dispatch, id, trainPos, ]);
-
-    useEffect(() => {
-        if (trainPos.length > 0){
-            intervalRef.current = setInterval(() => {
-                trainPos.forEach(train => {            
-                    dispatch(trainMoves({
-                        train_id: train.id,
-                    }))
-                });
-            }, 10);
-        }
-        return () => clearInterval(intervalRef.current);
-    }, [sourceX, sourceY, targetX, targetY, id, trainPos, dispatch]);
-*/
+    
     useEffect(() => {
         if (isDeleting){
             dispatch(deleteLine(id))
         }
-    }, [isDeleting, id, dispatch])
+    }, [isDeleting, id, dispatch]);
 
     return (
         <>            
@@ -104,7 +72,7 @@ export default function Line({
                         style={{
                             zIndex: 1,
                             position: 'absolute',
-                            transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px) rotate(${270-Math.atan2((targetX-sourceX),(targetY-sourceY))* (180 / Math.PI)}deg)`,
+                            transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px) rotate(${train.translateDeg}deg)`,
                             pointerEvents: 'all',
                             width:"20px",
                             height:"10px",
@@ -120,7 +88,7 @@ export default function Line({
                             fontSize: "15px",
                             transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px)`,
                     }}>
-                        {(sectionTrains.find(train_ => train_.id === train.id)?.data.passengers.length)}
+                        {/*(sectionTrains.find(train_ => train_.id === train.id)?.data.passengers.length)*/}
 
                     </span>
                 </EdgeLabelRenderer>
@@ -129,85 +97,3 @@ export default function Line({
         </>
     )
 }
-
-
-
-/*
-    const [tmp, setTmp] = useState(0)
-    useEffect(() => {
-        if (tmp < 10){
-            intervalRef.current = setInterval(() => {
-                console.log("edge_id:" + id + " tmp:"+tmp)
-                setTmp(tmp => tmp + 1);
-            }, 1000);
-        }
-        return () => clearInterval(intervalRef.current);
-    }, [intervalRef, tmp, setTmp]);
-    useEffect(() => {
-        if (trains.length > 0){
-            intervalRef.current = setInterval(() => {
-                console.log(color)
-                trains.forEach(train => {
-                    dispatch(shoveTrain({
-                        sourceX,
-                        sourceY,
-                        targetX,
-                        targetY,
-                        id: train.id,
-                    }));
-                });
-            }, 1);
-        }
-        return () => clearInterval(intervalRef.current);
-    }, [intervalRef, trains]);
-*/
-
-
-
-/*
-    useEffect(() => {
-        console.log(trains);
-        sectionTrains.forEach(train => {
-            let index = 0;
-            while (index < trains.length && trains[index].id !== train.id ){
-                ++index;
-            }
-            if (index >= trains.length){
-                setTrains(trains => [...trains, {
-                    id: train.id,
-                    distance: train.currentPos.distanceFinished,
-                }]);
-            }
-        });
-    }, [sectionTrains]);
-
-    useEffect(() => {
-        if (trains.length > 0){
-            intervalRef.current = setInterval(() => {
-                trains.forEach((distance, index) => {            
-                    const train = sectionTrains.find(train => train.id === distance.id);
-                    const distancePerTick = train.traits.speed / Math.sqrt(((sourceX - targetX)**2 + (sourceY - targetY)**2));
-                    const currentDistace = distance.distance + distancePerTick;
-                    if (distance.distance < train.currentPos.target){
-                        if (currentDistace >= 1){
-                            setTrains([
-                                ...trains.slice(0, index), 
-                                ...trains.slice(index + 1),
-                            ])
-                        } else {
-                            setTrains([
-                                ...trains.slice(0, index), 
-                                {
-                                    id: train.id,
-                                    distance: currentDistace,
-                                },
-                                ...trains.slice(index + 1),
-                            ])
-                        }
-                    }
-                });
-            }, 100);
-        }
-        return () => clearInterval(intervalRef.current);
-    }, [intervalRef, trains]);
-*/

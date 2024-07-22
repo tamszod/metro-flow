@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { addEdge, applyEdgeChanges } from "reactflow";
-import { bfs } from "./utilities/path";
+import { aStar, bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger } from "./logic";
 import { areaHeight, areaWidth, bonusStationsMultiplier, cut, placeHolderNames, stationsPerRound } from "../config";
@@ -133,6 +133,8 @@ const gameSlice = createSlice({
                 })
                 if (lines.length > 0){
                     const lineId = `${state.lines.length}`;
+                    const sourcePos = state.stations.find(station => station.id===payload.source).position;
+                    const targetPos = state.stations.find(station => station.id===payload.target).position;
                     state.lines = addEdge({
                             ...payload,
                             id: lineId,
@@ -146,10 +148,11 @@ const gameSlice = createSlice({
                                     {
                                         id: state.trains.length,
                                         distance: 0.0,
+                                        translateDeg: 90-Math.atan2((targetPos.x-sourcePos.x),(targetPos.y-sourcePos.y))*(180 / Math.PI), 
                                     }
                                 ],
-                                sourcePos: state.stations.find(station => station.id===payload.source).position,
-                                targetPos: state.stations.find(station => station.id===payload.target).position,
+                                sourcePos,
+                                targetPos,
                             }},
                             state.lines
                         );
@@ -159,10 +162,13 @@ const gameSlice = createSlice({
                             passengers : [],
                         },
                         currentPos: {
+                            id: lineId,  // 
                             type: "line", // Train position in the system. (line or station)
-                            id: lineId,  // «
-                            source: 0.0, // The train position on the line section.
-                            target: 1.0, // Train heading to this point of the line section.
+                            data : {
+                                source: 0.0, // The train position on the line section.
+                                target: 1.0, // Train heading to this point of the line section.
+                                translateDeg: 90-Math.atan2((targetPos.x-sourcePos.x),(targetPos.y-sourcePos.y))* (180 / Math.PI),
+                            }
                         },
                         lastPos: {
                             type: "station",
@@ -218,85 +224,7 @@ const gameSlice = createSlice({
                 state.transportGraphHash = hashObject(state.transportGraph);
             }
         },
-        trainEntersLine: (state, {payload}) => {
-            const section = state.lines.find(line => line.id === payload.id)
-            section.data.trainPos = [...section.data.trainPos, {
-                id: payload.train_id,
-                distance:payload.distance,
-            }]
-
-        },
-        trainMoves: (state, {payload:{train_id}}) => {
-            const train = state.trains.find(train => train.id === train_id);
-            const section = state.lines.find(line => line.id === train.currentPos.id);
-            const distance = train.traits.speed / Math.sqrt(((section.data.sourcePos.x - section.data.targetPos.x)**2 + (section.data.sourcePos.y - section.data.targetPos.y)**2));
-            const trainPosOnSection = section.data.trainPos.find(train => train.id === train_id);
-            if (train.currentPos.source < train.currentPos.target){
-                trainPosOnSection.distance += distance;
-                if (trainPosOnSection.distance >= 1){
-                    train.lastPos.type=train.currentPos.type;
-                    train.lastPos.id=train.currentPos.id;
-                    train.currentPos.type="station";
-                    train.currentPos.id=section.target;
-                    section.data.trainPos = section.data.trainPos.filter(pos => pos.id!== train_id);
-                }
-            } else {
-                trainPosOnSection.distance -= distance;
-                if (trainPosOnSection.distance <= 0.0){
-                    train.lastPos.type=train.currentPos.type;
-                    train.lastPos.id=train.currentPos.id;
-                    train.currentPos.type="station";
-                    train.currentPos.id=section.source;
-                    section.data.trainPos = section.data.trainPos.filter(pos => pos.id!== train_id);
-                }
-            }
-        },
-        trainEntersStation: (state, {payload:{id}}) => {
-            const train = state.trains.find(train => train.id === id && train.currentPos.type === "station");
-            const station = state.stations.find(station => station.id === train.currentPos.id);
-            let lines = state.lines.filter(line => (line.source === station.id || line.target === station.id) && line.data.color === train.traits.color);
-            if (lines.length > 1){
-                lines = lines.filter(line => line.id !== train.lastPos.id);
-            }
-            train.lastPos.type=train.currentPos.type;
-            train.lastPos.id=train.currentPos.id;
-            train.currentPos.type="line";
-            train.currentPos.id=lines[0].id;
-            train.currentPos.source = lines[0].source === station.id ? 0.0 : 1.0;
-            train.currentPos.target = train.currentPos.source === 0.0 ? 1.0 : 0.0;
-            const nextStation = lines[0].source === station.id ? lines[0].target : lines[0].source;
-            const passengers = [...train.data.passengers, ...station.data.passengers];
-            train.data.passengers = [];
-            station.data.passengers = [];
-            passengers.forEach(passenger => {
-                if (station.id === passenger.destinationId){
-                    state.passengers += 1;
-                    return;
-                }
-                if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
-                    passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
-                    train.data.passengers.push(passenger);
-                } else {
-                    if (passenger.hash !== state.transportGraphHash){
-                        passenger.travelPlan = bfs(state.transportGraph, passenger.destinationId, station.id);
-                        passenger.hash = state.transportGraphHash;
-                        if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
-                            passenger.travelPlan = passenger.travelPlan.slice(0, passenger.travelPlan.length-1);
-                            train.data.passengers.push(passenger);
-                            return;
-                        } 
-                    }
-                    station.data.passengers.push(passenger);
-                }
-            });
-        },
         nextFrame: (state) =>  {
-            //let trains = JSON.parse(JSON.stringify(game.trains));
-            //let lines = JSON.parse(JSON.stringify(game.lines));
-            //let stations = JSON.parse(JSON.stringify(game.stations));
-            //let passengers = JSON.parse(JSON.stringify(game.passengers));
-            //const transportGraph = game.transportGraph;
-            //const transportGraphHash = game.transportGraphHash;
             state.trains = state.trains.map(train => {
                 if (train.currentPos.type === "station"){
                     const station = state.stations.find(station => station.id === train.currentPos.id);
@@ -307,28 +235,13 @@ const gameSlice = createSlice({
                     } else {
                         line = lines[0];
                     }
-                    train.lastPos.type = train.currentPos.type;
-                    train.lastPos.id = train.currentPos.id;
-                    train.currentPos.type = "line";
-                    train.currentPos.id = line.id;
-                    if (line.source === station.id){
-                        train.currentPos.source = 0.0;
-                        train.currentPos.target = 1.0;
-                    } else {
-                        train.currentPos.source = 1.0;
-                        train.currentPos.target = 0.0;
-                    }
-                    line.data.trainPos = [...line.data.trainPos, {
-                        id: train.id,
-                        distance: train.currentPos.source,
-                    }];
-                    const nextStation = lines[0].source === station.id ? lines[0].target : lines[0].source;
+                    const nextStation = line.source === station.id ? line.target : line.source;
                     const passengers = [...train.data.passengers, ...station.data.passengers];
                     train.data.passengers = [];
                     station.data.passengers = [];
                     passengers.forEach(passenger => {
                         if (station.id === passenger.destinationId){
-                            state.passengers += 1;
+                            state.passengers += 1;  
                             return;
                         }
                         if (passenger.travelPlan && passenger.travelPlan[passenger.travelPlan.length-2] === nextStation){
@@ -347,15 +260,34 @@ const gameSlice = createSlice({
                             station.data.passengers.push(passenger);
                         }
                     });
+                    train.lastPos = {...train.currentPos};
+                    train.currentPos.type = "line";
+                    train.currentPos.id = line.id;
+                    if (line.source === station.id){
+                        train.currentPos.data.source = 0.0;
+                        train.currentPos.data.target = 1.0;
+                    } else {
+                        train.currentPos.data.source = 1.0;
+                        train.currentPos.data.target = 0.0;
+                    }
+                    train.currentPos.data.translateDeg = 90-Math.atan2((line.data.targetPos.x-line.data.sourcePos.x),(line.data.targetPos.y-line.data.sourcePos.y))* (180 / Math.PI)
+                    line.data.trainPos = [...line.data.trainPos, {
+                        id: train.id,
+                        distance: train.currentPos.data.source,
+                        //translateX,
+                        //translateY, //line.data.targetPos.x
+                        translateDeg: 90-Math.atan2((line.data.targetPos.x-line.data.sourcePos.x),(line.data.targetPos.y-line.data.sourcePos.y))* (180 / Math.PI),  
+                    }];
                 } else if (train.currentPos.type === "line"){
                     const line = state.lines.find(line => line.id === train.currentPos.id);
                     const distance = train.traits.speed / Math.sqrt(((line.data.sourcePos.x - line.data.targetPos.x)**2 + (line.data.sourcePos.y - line.data.targetPos.y)**2));
                     const trainPosOnSection = line.data.trainPos.find(pos => pos.id === train.id);
-                    if (train.currentPos.source < train.currentPos.target){
+                    if (train.currentPos.data.source < train.currentPos.data.target){
                         trainPosOnSection.distance += distance;
                         if (trainPosOnSection.distance >= 1){
-                            train.lastPos.type=train.currentPos.type;
-                            train.lastPos.id=train.currentPos.id;
+                            //train.lastPos.type = train.currentPos.type;
+                            //train.lastPos.id = train.currentPos.id;
+                            train.lastPos = {...train.currentPos};
                             train.currentPos.type="station";
                             train.currentPos.id=line.target;
                             line.data.trainPos = line.data.trainPos.filter(pos => pos.id!== train.id);
@@ -363,8 +295,9 @@ const gameSlice = createSlice({
                     } else {
                         trainPosOnSection.distance -= distance;
                         if (trainPosOnSection.distance <= 0.0){
-                            train.lastPos.type=train.currentPos.type;
-                            train.lastPos.id=train.currentPos.id;
+                            //train.lastPos.type = train.currentPos.type;
+                            //train.lastPos.id = train.currentPos.id;
+                            train.lastPos = {...train.currentPos};
                             train.currentPos.type="station";
                             train.currentPos.id=line.source;
                             line.data.trainPos = line.data.trainPos.filter(pos => pos.id!== train.id);
@@ -375,7 +308,6 @@ const gameSlice = createSlice({
             });
         },
         nextRound: (state) => {
-
             state.round = state.round + 1;
             let stationCount = 0
             const totalStations = stationsPerRound+Math.floor(state.round/bonusStationsMultiplier) + state.futureStations.length;
@@ -432,9 +364,7 @@ const gameSlice = createSlice({
                 station.data.lifetime += 1;
                 station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => {
                     const destinationId = randomizeDestinationForPassenger(stationIndex, state.stations);
-                    console.log("bfs")
                     const travelPlan = bfs(state.transportGraph, destinationId, station.id);
-                    console.log("bfs succeded")
                     const hash = hashObject(state.transportGraph);
                     return {
                         destinationId,
@@ -450,8 +380,7 @@ const gameSlice = createSlice({
 })
 
 //Actions
-export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, nextRound,
-    trainEntersLine, trainMoves, trainEntersStation, deleteLine, nextFrame } = gameSlice.actions
+export const { restart, mutateGame, onEdgesChange, buildLine, revealStation, nextRound, deleteLine, nextFrame } = gameSlice.actions
 
 
 //Reducer

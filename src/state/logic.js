@@ -1,7 +1,7 @@
 import axios from "axios";
 import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, placeIndicators, roundStartDelay, stationsPerRound } from "../config";
 import { mutateGame, nextFrame, nextRound } from "./slice";
-import { bfs } from "./utilities/path";
+import { aStar, bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 
 const generateNextGrids = (gridIndex, grids) => {
