@@ -5,43 +5,58 @@ import Line from "./utils/line";
 import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { startRoundAction } from "../state/logic";
-import { buildLine, onEdgesChange, restart, revealStation } from "../state/slice";
-import { selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
+import { nextRoundAction } from "../state/logic";
+import { addTrainToLine, buildLine, heat, nextFrame, restart, revealStation } from "../state/slice";
+import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectHeated, selectRestartRequested } from "../state/selectors";
 import { areaHeight, areaWidth, pace } from "../config";
 
 const proOptions = { hideAttribution: true };
 
 export const Flow = () => {
     const dispatch = useDispatch();
+    const [simulation, setSimulation] = useState(true)
     const passengers = useSelector(selectPassengers);
+    const iLifeTimeLeft = useSelector(selectLifeTimeLeft);
+    const bRestartRequested = useSelector(selectRestartRequested);
+    const bHeated = useSelector(selectHeated);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
     const round = useSelector(selectDay);
     const linesColors = useSelector(selectLinesColors);
     const [started, setStarted] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0)
+    const [timeLeft, setTimeLeft] = useState(0);
     const intervalRef = useRef();
-    //const { setViewport, zoomIn, zoomOut } = useReactFlow();
-    //const [x, setX] = useState(200);
-    //const [y, setY] = useState(200);
-    //const [zoom, setZoom] = useState(1);
-
-    //const game = useSelector(state => state.game)
+    const gameLoopTimer = useRef();
+    const gameHeatTimer = useRef();
+    
+    
 
     useEffect(() => {
         if (started){
             if (timeLeft > 0){
-                if (timeLeft % pace === 0){
-                    dispatch(revealStation());
+                if (simulation){
+                    if (timeLeft % pace === 0){
+                        dispatch(revealStation());
+                    }
+                    intervalRef.current = setInterval(() => {
+                        setTimeLeft(timeLeft - 1)
+                    }, 1000);
                 }
-                intervalRef.current = setInterval(() => {
-                    setTimeLeft(timeLeft - 1)
-                }, 1000);
                 return () => clearInterval(intervalRef.current);
             } 
         }
-    }, [timeLeft, started, dispatch]);
+    }, [timeLeft, started, simulation, dispatch]);
+
+    useEffect(() => {
+        if (started){
+            gameLoopTimer.current = setInterval(() => {
+                if (simulation){
+                    dispatch(nextFrame());
+                }
+            }, 20);
+            return () => clearInterval(gameLoopTimer.current);
+        }
+    }, [timeLeft, started, simulation, dispatch]);
 
     useEffect(() => {
         if (timeLeft === 0){
@@ -49,12 +64,32 @@ export const Flow = () => {
         }
     }, [timeLeft, setStarted]);
 
+    useEffect(() => {
+        if (bHeated){
+            gameHeatTimer.current = setInterval(() => {
+                if (simulation){
+                    dispatch(heat(50));
+                }
+            }, 50);
+            return () => clearInterval(gameHeatTimer.current);
+        }
+    }, [bHeated]);
+
+    useEffect(() => {
+        if (bRestartRequested){
+            dispatch(restart());
+            clearInterval(gameHeatTimer.current);
+            clearInterval(gameLoopTimer.current);
+            clearInterval(intervalRef.current);
+        }
+    }, [bRestartRequested, restart, dispatch]);
+
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);
 
     const start = async () => {
         setStarted(true);
-        dispatch(await startRoundAction(setTimeLeft));
+        dispatch(nextRoundAction(setTimeLeft));
     }
 
     return (
@@ -79,7 +114,15 @@ export const Flow = () => {
                 </>
                 }
             </>
-            }</p>
+            }
+            <>
+                {
+                    !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ?
+                    <button onClick={event => {setSimulation(s => s = !s)}}>Simulation {simulation ? <>OFF</> : <>ON</>}</button>
+                    : <></>
+                }
+            </>
+            </p>
             <div
                 style={{
                     width: "98vw",
@@ -97,9 +140,9 @@ export const Flow = () => {
                         nodes={nodes} 
                         edges={edges}
                         connectionMode={"loose"}
-                        onEdgesChange={(e) => dispatch(onEdgesChange(e))}
                         onConnect={(e) => dispatch(buildLine(e))}
                         defaultViewport={{x:areaWidth*3, y:areaHeight*3, zoom: 1}}
+                        onEdgeDoubleClick={(_, line) => dispatch(addTrainToLine(line))}
                         disableKeyboardA11y={false}
                         deleteKeyCode={null}
                     >
@@ -107,7 +150,13 @@ export const Flow = () => {
                             margin:"50px",
                         }}>
                         Passengers: {passengers}
-
+                        </strong>
+                        <strong
+                            style={{
+                                color: (iLifeTimeLeft < 10 ? "red" : "black")
+                            }}
+                        >
+                        Life left: {Math.abs(iLifeTimeLeft).toFixed(2)}s
                         </strong>
                     <Controls 
                         showZoom={false}

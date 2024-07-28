@@ -2,9 +2,11 @@ import { createSelector } from "@reduxjs/toolkit";
 import { pace } from "../config";
 
 export const selectNodes = (state) => state.game.stations; // TO BE REPLACED SOLELY BY selectStations
-
+export const selectLifeTimeLeft = (state) => state.game.lifeTimeLeft;
+export const selectHeated = (state) => state.game.bHeated;
 export const selectPassengers = (state) => state.game.passengers;
 export const selectStations = (state) => state.game.stations;
+export const selectRestartRequested = (state) => state.game.bRestartRequested;
 export const selectStation = createSelector(
     [
         selectStations,
@@ -18,6 +20,7 @@ export const selectEdges = (state) => state.game.lines;
 export const selectDay = (state) => state.game.round;
 export const selectTrains = (state) => state.game.trains;
 export const calculateRoundTime = (state) => state.game.futureStations.length * pace + 1;
+export const iFutureStationCount = (state) => state.game.futureStations.length;
 
 export const selectSectionTrains = createSelector(
     [
@@ -49,26 +52,5 @@ export const selectLinesColors = createSelector(
             }
         });
         return colors;
-    }
-)
-
-export const selectWaitingPassengersAtStation = createSelector(
-    [
-        (state, id) => selectStation(state, id),
-        selectStations,
-
-    ], (station, stations) => {
-        const waitingPassengersByStation = {};
-        station?.data.passengers.forEach(passenger => {
-            if (passenger.destinationId in waitingPassengersByStation){
-                waitingPassengersByStation[passenger.destinationId].count += 1;
-            } else {
-                waitingPassengersByStation[passenger.destinationId] = {
-                    count : 1,
-                    name : stations.find(station => station.id === passenger.destinationId).data.name,
-                }
-            }
-        });
-        return Object.keys(waitingPassengersByStation).length > 0 ? waitingPassengersByStation : false;
     }
 )
