@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef } from "react";
+import React, { memo } from "react";
 import { Handle, useEdges } from "reactflow";
 import { selectStationTrains } from "../../state/selectors";
 import { useSelector } from "react-redux";
