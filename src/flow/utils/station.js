@@ -2,7 +2,8 @@ import React, { memo, useEffect, useState } from "react";
 import { Handle, useEdges } from "reactflow";
 import { selectStationTrains, selectWaitingPassengersAtStation } from "../../state/selectors";
 import { useDispatch, useSelector } from "react-redux";
-import { trainEntersStation } from "../../state/slice";
+import { lImpatientPassengerMargin, lPassengerMarginOnTrain } from "../../config";
+import { randomNumber } from "../../state/logic";
 
 export default memo((props) => {
   	const trains = useSelector(state => selectStationTrains(state, props.id));
@@ -115,21 +116,6 @@ export default memo((props) => {
 									transform: `rotate(${degree}deg)`,
 								}
 							}>
-								{/*<div
-								style={
-								{ 
-									background: edges[0].data.color,
-									width: "12px",
-									height: "2.1px",
-									borderRadius: 0,
-									transform: `rotate(90deg)`,
-									marginTop: "9px",
-									marginLeft: "4px",
-								}
-							}
-							>
-
-								</div>*/}
 							</Handle>
 						</div>
 				} else {
@@ -141,28 +127,38 @@ export default memo((props) => {
 			trains.map((train, index) => (
 				<React.Fragment key={index}>
 					<div
-                        style={{
-                            zIndex: 1,
-                            position: 'absolute',
-                            //transform: `translate(-50%, -50%) translate(${sourceX+(targetX-sourceX)*train.distance}px,${sourceY+(targetY-sourceY)*train.distance}px) rotate(${train.translateDeg}deg)`,
-                            transform: `translate(-25%, -40%) rotate(${train.lastPos.data.translateDeg}deg)`,
+						style={{
+							zIndex: 1,
+							position: 'absolute',
+							transform: `translate(-25%, -40%) rotate(${(train.currentPos.data.source === 0 ? 180 : 0) + train.lastPos.data.translateDeg}deg)`,
 							pointerEvents: 'all',
-                            width:"20px",
-                            height:"10px",
-                            background:train.traits.color,
-                        }}
-                        className="nodrag nopan"
-                    >
-                    </div>
-                    <span
-                        style={{
-                            zIndex: 2,
-                            position: "absolute",
-                            fontSize: "15px",
-							transform: `translate(0%, -50%)`,
-	                    }}>
-                        {/*train.data.passengers.length*/}
-                    </span>
+							width:"22px",
+							height:"12px",
+							background:train.traits.color,
+						}}
+						className="nodrag nopan"
+					>
+						{ 
+						train.data.passengers.map((passenger, index) => (
+							<div 
+								key={index}
+								style={{
+									position: 'absolute',
+									zIndex: 1,
+									pointerEvents: 'all',
+									width:"4.5px",
+									height:"4.5px",
+									marginLeft: lPassengerMarginOnTrain[index].left,
+									marginTop: lPassengerMarginOnTrain[index].top,
+									borderRadius:"25px",
+									border: "0.25px solid",
+									borderColor: "black",
+									backgroundColor: passenger.color,
+								}}
+							className="nodrag nopan"
+							/>
+						))}
+					</div>
 				</React.Fragment>
 			))
 		}
@@ -170,6 +166,7 @@ export default memo((props) => {
             id={"station"}
             style={
                 {
+					background: props.data.color,
                     top:"2px",
                 }
             }
@@ -182,99 +179,31 @@ export default memo((props) => {
               fontSize:"5px",
               marginTop: "2px",
               marginLeft:"12px",
-              backgroundColor: hover ? "blue" : "",
               whiteSpace: "nowrap",
             }
           }
-        >{props.data.name}</span>
-		{passengers ? <>{hover ?<div
-				style={{
-					fontSize:"8px",
-					width:"150px",
-					backgroundColor:"lightgray",
-					margin:"4px",
-					zIndex:-10
-				}}
-			>
-			<h2 style={{
-				margin:"4px",
-				color: "red",
-			}}>Passengers Are Waiting!</h2>
-			<table><tbody>
-				{
-					Object.values(passengers).map((passenger, index) => (
-						<tr key={index}><td>{passenger.count} to {passenger.name}</td></tr>
-					))
-				}
-			</tbody></table>
-		</div> : <div
-				style={{
-					fontSize:"15px",
-					marginLeft: "-6px",
-					marginTop: "-13px",
-				}}
-		>!
-		</div>}</>:<></>}
+        >{!process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? <>{props.id}</> : <> {props.data.name} </>}</span>
+		{
+			props.data.passengers.map((objPassenger, iPassenger) => (
+				<div 
+					key={iPassenger}
+					style={{
+						position: 'absolute',
+						zIndex: 1,
+						pointerEvents: 'all',
+						width:"4.5px",
+						height:"4.5px",
+						marginLeft: 10+iPassenger*6,
+						marginTop: iPassenger < props.data.passengerLimit ? 0 : lImpatientPassengerMargin[randomNumber(0,lImpatientPassengerMargin.length-1)].top,
+						borderRadius:"25px",
+						border: "0.25px solid",
+						borderColor: "black",
+						backgroundColor: objPassenger.color,
+					}}
+					className="nodrag nopan"
+				/>
+			))
+		}
       </div>
     );
 });
-
-
-/*
-marginTop = -1.5-y+handleY;
-					marginLeft = -5-x+handleX;
-
-
-					const sourceX = edges[0].data.sourcePos.x
-					const sourceY = edges[0].data.sourcePos.y
-					const targetX = edges[0].data.targetPos.x
-					const targetY = edges[0].data.targetPos.y
-
-					const m = (targetY - sourceY) / (targetX - sourceX);
-					const handleX = edges[0].data.targetPos.x === props.xPos && edges[0].data.targetPos.y === props.yPos ? targetX+(sourceX > targetX ? -1.5 : 1.5) : sourceX+( targetX > sourceX ? -1.5 : 1.5);
-					const y = edges[0].data.targetPos.x === props.xPos && edges[0].data.targetPos.y === props.yPos ? targetY : sourceY;
-					const x = edges[0].data.targetPos.x === props.xPos && edges[0].data.targetPos.y === props.yPos ? targetX : sourceX;
-					const handleY = y + m*(handleX-x)
-					//console.log(props.id)
-					//console.log(sourceX)
-					//console.log(sourceY)
-					//console.log(targetX)
-					//console.log(targetY)
-					//console.log(handleX)
-					//console.log(handleY)
-					//console.log("===========")
-					marginTop = ;
-					marginLeft =;
-					if (sourceX <= targetX){
-						if (sourceY <= targetY){
-							marginTop = -1.5;
-							marginLeft = -5;
-						} else {
-							marginTop = -1.5;
-							marginLeft = -5;
-						}
-					} else {
-						if (sourceY <= targetY){
-							marginTop = -1.5;
-							marginLeft = -5;
-						} else {
-							marginTop = -1.5;
-							marginLeft = -5;
-						}
-				
-					}
-					//marginTop = -1.5-y+handleY;
-					//marginLeft = -5-x+handleX;
-					/*if (handleX > x){
-						marginTop = -1.5-y+handleY;
-						marginLeft = -5-x+handleX;
-					} else {
-						if (handleY > y){
-							marginTop = -1.5-y+handleY;
-							marginLeft = -5-x+handleX;
-
-						} else {
-							marginTop = -1.5-y+handleY;
-							marginLeft = -5-x+handleX;
-						}
-					}*/

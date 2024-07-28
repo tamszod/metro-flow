@@ -1,6 +1,7 @@
 Gameplay:
     - The trains will only move when the day is going.
     - The round timer has been increased as an adjustment to the train changes.
+    - After 10 sections build for a singualar line you can add an extra train by doubleclicking on a section of the line.
 
 Performance:
     - Decreased lag while playing. All trains should be synchronised to each other in each frame.

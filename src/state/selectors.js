@@ -66,7 +66,7 @@ export const selectWaitingPassengersAtStation = createSelector(
             } else {
                 waitingPassengersByStation[passenger.destinationId] = {
                     count : 1,
-                    name : stations.find(station => station.id === passenger.destinationId).data.name,
+                    name : !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? passenger.destinationId : stations.find(station => station.id === passenger.destinationId).data.name,
                 }
             }
         });

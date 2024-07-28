@@ -15,7 +15,8 @@ export const placeIndicators = [
 ];
 
 export const placeHolderNames = [
-    "Blue", "Black", "Red", "Rose", "Gold", "Charlotte", "Anne", "Peter", "Maria", 
+    "Blue", "Black", "Red", "Rose", "Gold", "Charlotte", "Anne", "Peter", "Maria", "Kovach", "Andreas",
+    "La Fayette", "Gilbert", "Motier", "Elizabeth", "Mary", "Jane", "Magdalene", "Blaha", 
 ];
 
 export const trainColor = {
@@ -25,3 +26,75 @@ export const trainColor = {
 export const trainDeleteColor = {
     yellow: "#FAFA3C",
 }
+
+
+//DEFAULT VALUES OF PASSENGER MARGINS
+export const lPassengerMarginOnTrain = [
+    {
+        left: 0.5,
+        top: 0.25,
+    },
+    {
+        left: 0.5,
+        top: 5.75,
+    },
+    {
+        left: 5.5,
+        top: 0.25,
+    },
+    {
+        left: 5.5,
+        top: 5.75,
+    },
+    {
+        left: 10.5,
+        top: 0.25,
+    },
+    {
+        left: 10.5,
+        top: 5.75,
+    },
+    {
+        left: 15.5,
+        top: 0.25,
+    },
+    {
+        left: 15.5,
+        top: 5.75,
+    }
+];
+export const lImpatientPassengerMargin = [
+    {
+        top: -2,
+    },
+    {
+        top: -1.75,
+    },
+    {
+        top: -1.5,
+    },
+    {
+        top: -1.25,
+    },
+    {
+        top: -1.5,
+    },
+    {
+        top: -1.25,
+    },
+    {
+        top: -1,
+    },
+    {
+        top: -0.75,
+    },
+    {
+        top: -0.5,
+    },
+    {
+        top: -0.25,
+    },
+    {
+        top: 0,
+    }
+]

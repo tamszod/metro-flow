@@ -5,16 +5,16 @@ import Line from "./utils/line";
 import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { nextFrameAction, nextRoundAction, startRoundAction } from "../state/logic";
-import { buildLine, nextFrame, nextRound, onEdgesChange, restart, revealStation } from "../state/slice";
-import { iFutureStationCount, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
-import { areaHeight, areaWidth, pace, roundStartDelay } from "../config";
+import { nextRoundAction } from "../state/logic";
+import { addTrainToLine, buildLine, nextFrame, restart, revealStation } from "../state/slice";
+import { selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
+import { areaHeight, areaWidth, pace } from "../config";
 
 const proOptions = { hideAttribution: true };
 
 export const Flow = () => {
     const dispatch = useDispatch();
-    const futureStationsCount = useSelector(iFutureStationCount);
+    const [simulation, setSimulation] = useState(true)
     const passengers = useSelector(selectPassengers);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
@@ -24,35 +24,33 @@ export const Flow = () => {
     const [timeLeft, setTimeLeft] = useState(0)
     const intervalRef = useRef();
     const gameLoopTimer = useRef();
-    //const { setViewport, zoomIn, zoomOut } = useReactFlow();
-    //const [x, setX] = useState(200);
-    //const [y, setY] = useState(200);
-    //const [zoom, setZoom] = useState(1);
-
-    //const game = useSelector(state => state.game)
 
     useEffect(() => {
         if (started){
             if (timeLeft > 0){
-                if (timeLeft % pace === 0){
-                    dispatch(revealStation());
+                if (simulation){
+                    if (timeLeft % pace === 0){
+                        dispatch(revealStation());
+                    }
+                    intervalRef.current = setInterval(() => {
+                        setTimeLeft(timeLeft - 1)
+                    }, 1000);
                 }
-                intervalRef.current = setInterval(() => {
-                    setTimeLeft(timeLeft - 1)
-                }, 1000);
                 return () => clearInterval(intervalRef.current);
             } 
         }
-    }, [timeLeft, started, dispatch]);
+    }, [timeLeft, started, simulation, dispatch]);
 
     useEffect(() => {
         //if (started){
             gameLoopTimer.current = setInterval(() => {
-                dispatch(nextFrame());
+                if (simulation){
+                    dispatch(nextFrame());
+                }
             }, 20);
             return () => clearInterval(gameLoopTimer.current);
         //}
-    }, [timeLeft, started, dispatch]);
+    }, [timeLeft, started, simulation, dispatch]);
 
     useEffect(() => {
         if (timeLeft === 0){
@@ -90,7 +88,15 @@ export const Flow = () => {
                 </>
                 }
             </>
-            }</p>
+            }
+            <>
+                {
+                    !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ?
+                    <button onClick={event => {setSimulation(s => s = !s)}}>Simulation {simulation ? <>OFF</> : <>ON</>}</button>
+                    : <></>
+                }
+            </>
+            </p>
             <div
                 style={{
                     width: "98vw",
@@ -108,9 +114,9 @@ export const Flow = () => {
                         nodes={nodes} 
                         edges={edges}
                         connectionMode={"loose"}
-                        onEdgesChange={(e) => dispatch(onEdgesChange(e))}
                         onConnect={(e) => dispatch(buildLine(e))}
                         defaultViewport={{x:areaWidth*3, y:areaHeight*3, zoom: 1}}
+                        onEdgeDoubleClick={(_, line) => dispatch(addTrainToLine(line))}
                         disableKeyboardA11y={false}
                         deleteKeyCode={null}
                     >
