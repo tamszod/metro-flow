@@ -7,6 +7,23 @@ A small web game created using ReactFlow and Redux. The goal is to satisfy deman
 
 The game currently in alpha so major features are still to come!
 
+# Alpha 2.2 (2024.07.29)
+<strong>Gameplay</strong><br/>
+&emsp;- The trains will only move when the day is going.<br/>
+&emsp;- The round timer has been increased as an adjustment to the train changes.<br/>
+&emsp;- After 10 sections build for a singular line you can add an extra train by double clicking on a section of the line.<br/>
+&emsp;- Passengers are represented by small circles which are the same color as their destination.<br/>
+&emsp;- If you keep a station too busy for 60 seconds the game will be over. A station is busy when more than 10 people are waiting.<br/>
+&emsp;- The maximum capacity of a train is 8 passengers.<br/>
+&emsp;- A train generates as many passengers as many day old it is until it is 4 days old, at that point it will generate 4 passengers per day. <br/>
+
+<strong>Performance</strong><br/>
+&emsp;- Decreased lag while playing. All trains should be synchronised to each other in each frame.<br/>
+
+<strong>Bugfixes</strong><br/>
+&emsp;- Fixed app freeze at the start of a new day or mid game when a train enters a station. It was caused by circular routes resulting the pathfinder entering into an infinite loop at some cases.<br/>
+&emsp;- Fixed an issue where trains were invisible when stopping at stations.<br/>
+
 # Alpha 2.1 (2024.06.15)
 <strong>Quality of Life:</strong><br />
 &emsp;» Redesigned the line section deletion system. Now lines can be deleted on touch devices.<br />
