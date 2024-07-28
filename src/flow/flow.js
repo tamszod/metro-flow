@@ -73,7 +73,7 @@ export const Flow = () => {
             }, 50);
             return () => clearInterval(gameHeatTimer.current);
         }
-    }, [bHeated]);
+    }, [bHeated, simulation, dispatch]);
 
     useEffect(() => {
         if (bRestartRequested){
@@ -82,7 +82,7 @@ export const Flow = () => {
             clearInterval(gameLoopTimer.current);
             clearInterval(intervalRef.current);
         }
-    }, [bRestartRequested, restart, dispatch]);
+    }, [bRestartRequested, dispatch]);
 
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);
