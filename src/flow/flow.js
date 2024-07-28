@@ -6,8 +6,8 @@ import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { nextRoundAction } from "../state/logic";
-import { addTrainToLine, buildLine, nextFrame, restart, revealStation } from "../state/slice";
-import { selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers } from "../state/selectors";
+import { addTrainToLine, buildLine, heat, nextFrame, restart, revealStation } from "../state/slice";
+import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectHeated, selectRestartRequested } from "../state/selectors";
 import { areaHeight, areaWidth, pace } from "../config";
 
 const proOptions = { hideAttribution: true };
@@ -16,14 +16,20 @@ export const Flow = () => {
     const dispatch = useDispatch();
     const [simulation, setSimulation] = useState(true)
     const passengers = useSelector(selectPassengers);
+    const iLifeTimeLeft = useSelector(selectLifeTimeLeft);
+    const bRestartRequested = useSelector(selectRestartRequested);
+    const bHeated = useSelector(selectHeated);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
     const round = useSelector(selectDay);
     const linesColors = useSelector(selectLinesColors);
     const [started, setStarted] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0)
+    const [timeLeft, setTimeLeft] = useState(0);
     const intervalRef = useRef();
     const gameLoopTimer = useRef();
+    const gameHeatTimer = useRef();
+    
+    
 
     useEffect(() => {
         if (started){
@@ -57,6 +63,26 @@ export const Flow = () => {
             setStarted(false);
         }
     }, [timeLeft, setStarted]);
+
+    useEffect(() => {
+        if (bHeated){
+            gameHeatTimer.current = setInterval(() => {
+                if (simulation){
+                    dispatch(heat(50));
+                }
+            }, 50);
+            return () => clearInterval(gameHeatTimer.current);
+        }
+    }, [bHeated]);
+
+    useEffect(() => {
+        if (bRestartRequested){
+            dispatch(restart());
+            clearInterval(gameHeatTimer.current);
+            clearInterval(gameLoopTimer.current);
+            clearInterval(intervalRef.current);
+        }
+    }, [bRestartRequested, restart, dispatch]);
 
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);
@@ -124,7 +150,13 @@ export const Flow = () => {
                             margin:"50px",
                         }}>
                         Passengers: {passengers}
-
+                        </strong>
+                        <strong
+                            style={{
+                                color: (iLifeTimeLeft < 10 ? "red" : "black")
+                            }}
+                        >
+                        Life left: {Math.abs(iLifeTimeLeft).toFixed(2)}s
                         </strong>
                     <Controls 
                         showZoom={false}

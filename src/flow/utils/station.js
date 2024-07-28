@@ -1,15 +1,12 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { Handle, useEdges } from "reactflow";
-import { selectStationTrains, selectWaitingPassengersAtStation } from "../../state/selectors";
-import { useDispatch, useSelector } from "react-redux";
+import { selectStationTrains } from "../../state/selectors";
+import { useSelector } from "react-redux";
 import { lImpatientPassengerMargin, lPassengerMarginOnTrain } from "../../config";
 import { randomNumber } from "../../state/logic";
 
 export default memo((props) => {
   	const trains = useSelector(state => selectStationTrains(state, props.id));
-  	const passengers = useSelector(state => selectWaitingPassengersAtStation(state, props.id));
-	const dispatch = useDispatch();
-	const [hover, setHover] = useState(false)
   	const edges = useEdges();
 /*
 	useEffect(
@@ -22,7 +19,6 @@ export default memo((props) => {
 		}, [trains, dispatch]
 	);
 */
-
 	const lines = {}
 	edges.forEach(edge => {
 		if(edge.source === props.id || edge.target === props.id){
@@ -44,8 +40,6 @@ export default memo((props) => {
             background: "white",
             userSelect: "none",
         }}
-        onMouseEnter={event => setHover(true)}
-        onMouseLeave={event => setHover(false)}
       >
 		{Object.entries(lines).map(([line, edges], index) => {
 				if (edges.length === 1){

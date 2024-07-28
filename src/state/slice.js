@@ -23,6 +23,9 @@ const initialState = {
     trains: [],
     round: 0,
     passengers : 0,
+    bHeated : false,
+    lifeTimeLeft: 60.0,
+    bRestartRequested: false,
 }
 
 const gameSlice = createSlice({
@@ -237,7 +240,7 @@ const gameSlice = createSlice({
                     }
                     if (bPassangerTransfered){
                         if (actionPassenger === "ARRIVED"){
-                            console.log("ARRIVED"); 
+                            //console.log("ARRIVED"); 
                             state.passengers = state.passengers + 1;
                             train.data.passengers = [ 
                                 ...train.data.passengers.slice(0, iPassenger),
@@ -245,7 +248,7 @@ const gameSlice = createSlice({
                             ];
                         } 
                         else if (actionPassenger === "DISEMBARKED"){
-                            console.log("DISEMBARKED"); 
+                            //console.log("DISEMBARKED"); 
                             station.data.passengers = [...station.data.passengers, {...train.data.passengers[iPassenger]}];
                             train.data.passengers = [
                                 ...train.data.passengers.slice(0, iPassenger),
@@ -253,7 +256,7 @@ const gameSlice = createSlice({
                             ];
                         }
                         else if (actionPassenger === "BOARDED"){
-                            console.log("BOARDED"); 
+                            //console.log("BOARDED"); 
                             train.data.passengers = [...train.data.passengers, {...station.data.passengers[iPassenger]}];
                             station.data.passengers = [
                                 ...station.data.passengers.slice(0, iPassenger),
@@ -304,6 +307,12 @@ const gameSlice = createSlice({
                 }
                 return train;
             });
+            if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit)){
+                state.bHeated = true;
+                //console.log("HEATED");
+            } else {
+                state.bHeated = false;
+            }
         },
         nextRound: (state) => {
             state.round = state.round + 1;
@@ -330,7 +339,6 @@ const gameSlice = createSlice({
                 stationCount += 1;
             }
 
-
             if (stationCount > 0){
                 let stationsNames = [];
                 //try {
@@ -351,7 +359,7 @@ const gameSlice = createSlice({
                         name:formatStationName(stationsNames.pop().name),
                         lifetime: 0,
                         color: sGenerateRandomRGBColor(),
-                        passengerLimit: 4,
+                        passengerLimit: 6,
                         passengers: [],
                     }
                     return station;
@@ -362,7 +370,7 @@ const gameSlice = createSlice({
 
             state.stations = state.stations.map((station, stationIndex) => {
                 station.data.lifetime += 1;
-                station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime).fill({}).map(passenger => {
+                station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime < 3 ? station.data.lifetime : 4 ).fill({}).map(passenger => {
                     const {destinationId, color} = randomizeDestinationForPassenger(stationIndex, state.stations);
                     const travelPlan = bfs(state.transportGraph, destinationId, station.id);
                     const hash = hashObject(state.transportGraph);
@@ -415,12 +423,22 @@ const gameSlice = createSlice({
                 },
             ];
         },
+        heat: (state, {payload}) => {
+            state.lifeTimeLeft -= payload/1000;
+            if (state.lifeTimeLeft < 0-payload/1000){
+                //alert("Game over!");
+                state.bRestartRequested = true;
+            }
+        }
+
     },
     extraReducers: builder => {},
 })
 
 //Actions
-export const { restart, mutateGame, buildLine, revealStation, nextRound, deleteLine, nextFrame, addTrainToLine } = gameSlice.actions
+export const { restart, mutateGame, buildLine, revealStation, nextRound, deleteLine, nextFrame, addTrainToLine,
+    heat,
+ } = gameSlice.actions
 
 //Reducer
 export const gameReducer = gameSlice.reducer;

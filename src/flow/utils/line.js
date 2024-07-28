@@ -3,7 +3,7 @@ import { BaseEdge, EdgeLabelRenderer } from "reactflow";
 import { selectSectionTrains } from "../../state/selectors";
 import { useEffect } from "react";
 import { deleteLine } from "../../state/slice";
-import { lPassengerMarginOnTrain, margin0 } from "../../config";
+import { lPassengerMarginOnTrain } from "../../config";
 /*
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){
