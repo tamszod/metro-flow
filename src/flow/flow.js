@@ -48,14 +48,14 @@ export const Flow = () => {
     }, [timeLeft, started, simulation, dispatch]);
 
     useEffect(() => {
-        //if (started){
+        if (started){
             gameLoopTimer.current = setInterval(() => {
                 if (simulation){
                     dispatch(nextFrame());
                 }
             }, 20);
             return () => clearInterval(gameLoopTimer.current);
-        //}
+        }
     }, [timeLeft, started, simulation, dispatch]);
 
     useEffect(() => {

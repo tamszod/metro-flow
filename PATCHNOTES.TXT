@@ -1,9 +1,13 @@
+ALPHA 2.2
+
 Gameplay:
     - The trains will only move when the day is going.
     - The round timer has been increased as an adjustment to the train changes.
     - After 10 sections build for a singular line you can add an extra train by double clicking on a section of the line.
     - Passengers are represented by small circles which are the same color as their destination.
     - If you keep a station too busy for 60 seconds the game will be over. A station is busy when more than 6 people are waiting.
+    - At a moment the maximum capacity of a train is 8 passengers.
+    - A train generates as many passengers as many day old it is until it is 4 days old, at that point it will generate 4 passengers per day. 
 
 Performance:
     - Decreased lag while playing. All trains should be synchronised to each other in each frame.

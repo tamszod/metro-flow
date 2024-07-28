@@ -359,7 +359,7 @@ const gameSlice = createSlice({
                         name:formatStationName(stationsNames.pop().name),
                         lifetime: 0,
                         color: sGenerateRandomRGBColor(),
-                        passengerLimit: 6,
+                        passengerLimit: 10,
                         passengers: [],
                     }
                     return station;
@@ -370,7 +370,7 @@ const gameSlice = createSlice({
 
             state.stations = state.stations.map((station, stationIndex) => {
                 station.data.lifetime += 1;
-                station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime < 3 ? station.data.lifetime : 4 ).fill({}).map(passenger => {
+                station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime < 3 ? station.data.lifetime : 3 ).fill({}).map(passenger => {
                     const {destinationId, color} = randomizeDestinationForPassenger(stationIndex, state.stations);
                     const travelPlan = bfs(state.transportGraph, destinationId, station.id);
                     const hash = hashObject(state.transportGraph);
