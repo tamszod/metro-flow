@@ -6,7 +6,8 @@ export const selectLifeTimeLeft = (state) => state.game.lifeTimeLeft;
 export const selectHeated = (state) => state.game.bHeated;
 export const selectPassengers = (state) => state.game.passengers;
 export const selectStations = (state) => state.game.stations;
-export const selectRestartRequested = (state) => state.game.bRestartRequested;
+export const selectGameState = (state) => state.game.gameState;
+export const selectTimeLeft = (state) => state.game.time;
 export const selectStation = createSelector(
     [
         selectStations,
@@ -15,6 +16,7 @@ export const selectStation = createSelector(
         return stations.find(station => station.id === id);
     }
 )
+
 
 export const selectEdges = (state) => state.game.lines;
 export const selectDay = (state) => state.game.round;

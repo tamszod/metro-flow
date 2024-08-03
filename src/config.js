@@ -1,7 +1,7 @@
 export const stationsPerRound = 4;
 export const bonusStationsMultiplier = 5; // After given days finished the generated stations number is increased by 1!
-export const areaWidth = 100;
-export const areaHeight = 75;
+export const areaWidth = 80;
+export const areaHeight = 80;
 export const cut = 15; 
 export const pace = 12; //12
 export const roundStartDelay = 4; //4

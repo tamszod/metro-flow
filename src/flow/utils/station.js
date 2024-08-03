@@ -8,17 +8,6 @@ import { randomNumber } from "../../state/logic";
 export default memo((props) => {
   	const trains = useSelector(state => selectStationTrains(state, props.id));
   	const edges = useEdges();
-/*
-	useEffect(
-		() => {
-			trains.forEach(train => {
-				dispatch(trainEntersStation({
-					id:train.id
-				}))
-			})
-		}, [trains, dispatch]
-	);
-*/
 	const lines = {}
 	edges.forEach(edge => {
 		if(edge.source === props.id || edge.target === props.id){
