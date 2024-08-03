@@ -5,91 +5,54 @@ import Line from "./utils/line";
 import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { nextRoundAction } from "../state/logic";
-import { addTrainToLine, buildLine, heat, nextFrame, restart, revealStation } from "../state/slice";
-import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectHeated, selectRestartRequested } from "../state/selectors";
-import { areaHeight, areaWidth, pace } from "../config";
+import { addTrainToLine, buildLine, GAME_STATE, nextFrame, nextRound, restart } from "../state/slice";
+import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectGameState, selectTimeLeft } from "../state/selectors";
+import { areaHeight, areaWidth } from "../config";
 
 const proOptions = { hideAttribution: true };
+
+export const nextFrameMs = 20;
+export const heatFrameMs = 50;
 
 export const Flow = () => {
     const dispatch = useDispatch();
     const [simulation, setSimulation] = useState(true)
     const passengers = useSelector(selectPassengers);
     const iLifeTimeLeft = useSelector(selectLifeTimeLeft);
-    const bRestartRequested = useSelector(selectRestartRequested);
-    const bHeated = useSelector(selectHeated);
+    const gameState = useSelector(selectGameState);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
     const round = useSelector(selectDay);
+    const timeLeft = useSelector(selectTimeLeft);
+    
     const linesColors = useSelector(selectLinesColors);
-    const [started, setStarted] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(0);
-    const intervalRef = useRef();
     const gameLoopTimer = useRef();
-    const gameHeatTimer = useRef();
-    
-    
 
     useEffect(() => {
-        if (started){
-            if (timeLeft > 0){
-                if (simulation){
-                    if (timeLeft % pace === 0){
-                        dispatch(revealStation());
-                    }
-                    intervalRef.current = setInterval(() => {
-                        setTimeLeft(timeLeft - 1)
-                    }, 1000);
-                }
-                return () => clearInterval(intervalRef.current);
-            } 
-        }
-    }, [timeLeft, started, simulation, dispatch]);
-
-    useEffect(() => {
-        if (started){
+        if (gameState === GAME_STATE.STARTED){
             gameLoopTimer.current = setInterval(() => {
                 if (simulation){
-                    dispatch(nextFrame());
+                    dispatch(nextFrame(nextFrameMs));
                 }
-            }, 20);
+            }, nextFrameMs);
             return () => clearInterval(gameLoopTimer.current);
         }
-    }, [timeLeft, started, simulation, dispatch]);
-
-    useEffect(() => {
-        if (timeLeft === 0){
-            setStarted(false);
-        }
-    }, [timeLeft, setStarted]);
-
-    useEffect(() => {
-        if (bHeated){
-            gameHeatTimer.current = setInterval(() => {
-                if (simulation){
-                    dispatch(heat(50));
-                }
-            }, 50);
-            return () => clearInterval(gameHeatTimer.current);
-        }
-    }, [bHeated, simulation, dispatch]);
-
-    useEffect(() => {
-        if (bRestartRequested){
-            dispatch(restart());
-            clearInterval(gameHeatTimer.current);
-            clearInterval(gameLoopTimer.current);
-            clearInterval(intervalRef.current);
-        }
-    }, [bRestartRequested, dispatch]);
+    }, [gameState, simulation, dispatch]);
 
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);
 
     const start = async () => {
-        setStarted(true);
-        dispatch(nextRoundAction(setTimeLeft));
+        dispatch(nextRound());
+    }
+
+    const restartButton = async () => {
+        if (gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND){
+            if (!window.confirm("Are you sure you want to restart the game?")){
+                return;
+            }
+        }
+        dispatch(restart())
     }
 
     return (
@@ -99,22 +62,20 @@ export const Flow = () => {
           }}>
             <h2>Day {round}</h2>
             <p 
-                    style={{margin:"5px"}}>{started && timeLeft === 0 ?
-            <>Loading</>
-            :
-            <>
-                {
-                started
+                    style={{margin:"5px"}}>{gameState === GAME_STATE.STARTED
             ? 
-            <>{timeLeft}s time left</>
+            <>{Math.floor(timeLeft)}s time left</>
                 :
                 <>
-                    <button onClick={event => {start()}}>New Day</button>
-                    <button onClick={event => {dispatch(restart())}}>Restart</button>
+                    {
+                        gameState === GAME_STATE.NOT_STARTED || gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND ?  <button onClick={event => {start()}}>New Day</button> : <></>
+                    }
+                    {
+                        gameState === GAME_STATE.GAME_OVER || gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND ? <button onClick={event => {restartButton()}}>Restart</button> : <></>
+                    }
+                    
                 </>
                 }
-            </>
-            }
             <>
                 {
                     !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ?
@@ -127,13 +88,17 @@ export const Flow = () => {
                 style={{
                     width: "98vw",
                     height: "74vh",
+                    cursor: "default",
                 }}
             >
-                <ReactFlowProvider>
+                <ReactFlowProvider
+                >
                     <ReactFlow
                         style={{
                         border: "black 2px solid",
-                        background:"white"}}
+                        background:"white",
+                        cursor: "default",
+                    }}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
                         proOptions={proOptions}
@@ -156,7 +121,7 @@ export const Flow = () => {
                                 color: (iLifeTimeLeft < 10 ? "red" : "black")
                             }}
                         >
-                        Life left: {Math.abs(iLifeTimeLeft).toFixed(2)}s
+                        Life left: {iLifeTimeLeft > 0 ? (iLifeTimeLeft).toFixed(2) : "0.00"}s
                         </strong>
                     <Controls 
                         showZoom={false}

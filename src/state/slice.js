@@ -3,9 +3,16 @@ import { addEdge } from "reactflow";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger, sGenerateRandomRGBColor } from "./logic";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, placeHolderNames, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, stationsPerRound } from "../config";
 
 export const fixedStationsPerRound = 9;
+
+export const GAME_STATE = {
+    NOT_STARTED : 0,
+    STARTED : 1,
+    WAITING_FOR_NEXT_ROUND: 2,
+    GAME_OVER : 3,
+}
 
 const initialState = {
     stations: [], 
@@ -23,9 +30,9 @@ const initialState = {
     trains: [],
     round: 0,
     passengers : 0,
-    bHeated : false,
     lifeTimeLeft: 60.0,
-    bRestartRequested: false,
+    time: 0,
+    gameState : GAME_STATE.NOT_STARTED,
 }
 
 const gameSlice = createSlice({
@@ -137,7 +144,7 @@ const gameSlice = createSlice({
                             id: payload.source,
                         },
                         traits: {
-                            speed: 1, // unit/second
+                            speed: 80, // km/hr
                             transferSpeed: 10,
                             capicity: 8,
                             color: lines[0],
@@ -187,7 +194,8 @@ const gameSlice = createSlice({
                 state.transportGraphHash = hashObject(state.transportGraph);
             }
         },
-        nextFrame: (state) =>  {
+        nextFrame: (state, {payload}) =>  {
+            // Handle train actions
             state.trains = state.trains.map(train => {
                 if (train.currentPos.type === "station"){
                     if (train.currentPos.delay > 0){
@@ -286,7 +294,7 @@ const gameSlice = createSlice({
                     train.currentPos.data.distance = train.currentPos.data.source;
                 } else if (train.currentPos.type === "line"){
                     const line = state.lines.find(line => line.id === train.currentPos.id);
-                    const distance = train.traits.speed / Math.sqrt(((line.data.sourcePos.x - line.data.targetPos.x)**2 + (line.data.sourcePos.y - line.data.targetPos.y)**2));
+                    const distance = (train.traits.speed/100) / Math.sqrt(((line.data.sourcePos.x - line.data.targetPos.x)**2 + (line.data.sourcePos.y - line.data.targetPos.y)**2));
                     if (train.currentPos.data.source < train.currentPos.data.target){
                         train.currentPos.data.distance += distance;
                         if (train.currentPos.data.distance >= 1.0){
@@ -307,15 +315,43 @@ const gameSlice = createSlice({
                 }
                 return train;
             });
+            // Reveal stations
+            if ((state.round > 1 && state.time % pace === 0) || (state.round === 1 && state.time % 1 === 0)){
+                if (state.futureStations.length > 0){
+                    const newStation = {
+                        id: `${state.stations.length + 1}`,
+                        type: "station",
+                        ...state.futureStations.pop(),
+                    }
+                    state.stations = [...state.stations, newStation]
+                    state.transportGraph = {...state.transportGraph, [newStation.id] : []};
+                    state.transportGraphHash = hashObject(state.transportGraph);
+                }
+            }
+            // Check if too many passengers are waiting!
+            let bHeated = false;
             if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit)){
-                state.bHeated = true;
-                //console.log("HEATED");
-            } else {
-                state.bHeated = false;
+                bHeated = true;
+            }
+            if (bHeated){
+                console.log("heated")
+                state.lifeTimeLeft -= payload/1000;
+                if (state.lifeTimeLeft < 0-payload/1000){
+                    alert("Game over!\nYou have transported " + state.passengers +" passengers!");
+                    state.gameState = GAME_STATE.GAME_OVER;
+                }
+            }
+            //Adjust game time
+            state.time = (state.time - payload/1000).toFixed(4);
+            if (state.time < 0){
+                state.gameState = GAME_STATE.WAITING_FOR_NEXT_ROUND;
             }
         },
         nextRound: (state) => {
+            // Adjust round count
             state.round = state.round + 1;
+
+            // Generate new stations to spawn
             let stationCount = 0
             const totalStations = stationsPerRound+Math.floor(state.round/bonusStationsMultiplier) + state.futureStations.length;
             const newFutureStations = [];
@@ -338,7 +374,6 @@ const gameSlice = createSlice({
                 newFutureStations.push({position:position});
                 stationCount += 1;
             }
-
             if (stationCount > 0){
                 let stationsNames = [];
                 //try {
@@ -365,9 +400,9 @@ const gameSlice = createSlice({
                     return station;
                 });
             }
-
             state.futureStations = [...state.futureStations, ...newFutureStations];
 
+            // Generate new passengers
             state.stations = state.stations.map((station, stationIndex) => {
                 station.data.lifetime += 1;
                 station.data.passengers = [...station.data.passengers, ...Array(station.data.lifetime < 3 ? station.data.lifetime : 3 ).fill({}).map(passenger => {
@@ -383,6 +418,16 @@ const gameSlice = createSlice({
                 })]
                 return station;
             });
+
+            // Set game time
+            if (state.round > 1){
+                state.time = state.futureStations.length*pace+roundStartDelay;
+            } else {
+                state.time = state.futureStations.length+roundStartDelay*2;
+            }
+
+            // Set game state
+            state.gameState = GAME_STATE.STARTED;
         },
         addTrainToLine: (state, {payload}) => {
             const line = state.lines.find(objLine => objLine.id === payload.id);
@@ -415,7 +460,7 @@ const gameSlice = createSlice({
                         id: payload.source,
                     },
                     traits: {
-                        speed: 1, // unit/second
+                        speed: 80, // unit/second
                         transferSpeed: 10,
                         capicity: 8,
                         color: line.data.color,
@@ -424,21 +469,14 @@ const gameSlice = createSlice({
             ];
         },
         heat: (state, {payload}) => {
-            state.lifeTimeLeft -= payload/1000;
-            if (state.lifeTimeLeft < 0-payload/1000){
-                //alert("Game over!");
-                state.bRestartRequested = true;
-            }
-        }
-
+            
+        },
     },
     extraReducers: builder => {},
 })
 
 //Actions
-export const { restart, mutateGame, buildLine, revealStation, nextRound, deleteLine, nextFrame, addTrainToLine,
-    heat,
- } = gameSlice.actions
+export const { restart, mutateGame, buildLine, nextRound, deleteLine, nextFrame, addTrainToLine} = gameSlice.actions
 
 //Reducer
 export const gameReducer = gameSlice.reducer;

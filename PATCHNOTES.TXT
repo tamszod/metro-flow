@@ -1,3 +1,20 @@
+ALPHA 2.2.1 - HOTFIX
+
+Gameplay:
+    - Trains default speed has been decreased by 20%. (In the future you will be able to upgrade it and the default will be even lower at that point.)
+    - The first round has been shortened compared to others.
+
+Bugfixes:
+    - Fixed an issue which disallowed restarting the game after it was game over.
+    - Fixed an issue where the life time timer was still ticking eventhough the round was over.
+
+Known Issues:
+    - If you build shared sections between different lines. Only one of them will be visible. (To be fixed in 3.1)
+    - If you have shared sections of lines and delete one of them the route will be inaccessable for passengers until you delete the other section and rebuild it. (To be fixed in 3.1)
+    - If you add extra trains to a line then delete sections and the criteria is no longer met, the extra trains will be not removed.
+
+=====================================================================================================================================
+
 ALPHA 2.2
 
 Gameplay:
@@ -5,8 +22,8 @@ Gameplay:
     - The round timer has been increased as an adjustment to the train changes.
     - After 10 sections build for a singular line you can add an extra train by double clicking on a section of the line.
     - Passengers are represented by small circles which are the same color as their destination.
-    - If you keep a station too busy for 60 seconds the game will be over. A station is busy when more than 6 people are waiting.
-    - At a moment the maximum capacity of a train is 8 passengers.
+    - If you keep a station too busy for 60 seconds the game will be over. A station is busy when more than 10 people are waiting.
+    - The maximum capacity of a train is 8 passengers.
     - A train generates as many passengers as many day old it is until it is 4 days old, at that point it will generate 4 passengers per day. 
 
 Performance:
