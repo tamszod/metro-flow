@@ -7,6 +7,20 @@ A small web game created using ReactFlow and Redux. The goal is to satisfy deman
 
 The game currently in alpha so major features are still to come!
 
+# Alpha 2.2.1 (2024.08.02)
+<strong>Gameplay</strong><br/>
+&emsp;- Trains default speed has been decreased by 20%.<br/>
+&emsp;- The first round has been shortened compared to others.<br/>
+
+<strong>Bugfixes</strong><br/>
+&emsp;- Fixed an issue which disallowed restarting the game after it was game over.<br/>
+&emsp;- Fixed an issue where the life time timer was still ticking eventhough the round was over.<br/>
+
+<strong>Known Issues:</strong><br />
+&emsp;- If you build shared sections between different lines. Only one of them will be visible. (To be fixed in 3.1)<br/>
+&emsp;- If you have shared sections of lines and delete one of them the route will be inaccessable for passengers until you delete the other section and rebuild it. (To be fixed in 3.1)<br/>
+&emsp;- If you add extra trains to a line then delete sections and the criteria is no longer met, the extra trains will be not removed.<br/>
+
 # Alpha 2.2 (2024.07.29)
 <strong>Gameplay</strong><br/>
 &emsp;- The trains will only move when the day is going.<br/>
