@@ -1,7 +1,7 @@
 ALPHA 2.2.1 - HOTFIX
 
 Gameplay:
-    - Trains default speed has been decreased by 20%. (In the future you will be able to upgrade it and the default will be even lower at that point.)
+    - Trains default speed has been decreased by 20%.
     - The first round has been shortened compared to others.
 
 Bugfixes:

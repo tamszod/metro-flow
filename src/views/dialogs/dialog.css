@@ -1,0 +1,40 @@
+.dialog__start {
+    font-family: Arial, sans-serif;
+}
+
+.dialog__start .ui__popup__header__title{
+    font-size: 44px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+    margin-left: 1vw;
+}
+
+.dialog__start .ui__popup__header{
+    height: 50px;
+}
+
+.dialog__start_text{
+    margin-top: 50px;
+    text-align: justify;
+}
+
+.dialog__start__start_button{
+    position: fixed;
+    top: 25vh;
+    left: 20vw;
+    transform: translate(-50%, 0%);
+    cursor: pointer;
+    background-color: white;
+    width: 12vw;
+    height: 4vh;
+    border: "black solid 1px";
+}
+.dialog__start__start_button:hover{
+    background-color: lightgrey;
+}
+
+.dialog__start__footer{
+    position: fixed;
+    font-weight: bold;
+    top: 30vh;
+}
