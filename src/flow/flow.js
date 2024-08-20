@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addTrainToLine, buildLine, GAME_STATE, nextFrame, nextRound, restart } from "../state/slice";
 import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectGameState, selectTimeLeft } from "../state/selectors";
 import { areaHeight, areaWidth } from "../config";
+import { LearnToPlay__SetOpen } from "../state/dialog/slice";
 
 const proOptions = { hideAttribution: true };
 
@@ -22,8 +23,6 @@ export const Flow = () => {
     const gameState = useSelector(selectGameState);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
-    const round = useSelector(selectDay);
-    const timeLeft = useSelector(selectTimeLeft);
     
     const linesColors = useSelector(selectLinesColors);
     const gameLoopTimer = useRef();
@@ -41,19 +40,6 @@ export const Flow = () => {
 
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);
-
-    const start = async () => {
-        dispatch(nextRound());
-    }
-
-    const restartButton = async () => {
-        if (gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND){
-            if (!window.confirm("Are you sure you want to restart the game?")){
-                return;
-            }
-        }
-        dispatch(restart())
-    }
 
     return (
         <div style={{
@@ -94,13 +80,13 @@ export const Flow = () => {
 
                         <strong
                             style={{
-                                margin:"50px",
+                                marginLeft:"10px",
+                                transform: "translate(-50%, -50%)",
                             }}
-                        >Day {round}</strong>
+                        ></strong>
                         <strong style={{
                             margin:"50px",
                         }}>
-                        Passengers: {passengers}
                         </strong>
                         <strong
                             style={{
@@ -109,135 +95,6 @@ export const Flow = () => {
                         >
                         Life left: {iLifeTimeLeft > 0 ? (iLifeTimeLeft).toFixed(2) : "0.00"}s
                         </strong>
-
-            <Controls 
-                        showZoom={false}
-                        showFitView={false}
-                        showInteractive={false}
-                        style={{
-                            backgroundColor:"transparent",
-                        }}
-             >{/*gameState === GAME_STATE.STARTED
-                ? 
-                <>{Math.floor(timeLeft)}s time left</>
-                    :
-                    <>
-                        {
-                            gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND ?  <button onClick={event => {start()}}>New Day</button> : <></>
-                        }
-                        {
-                            gameState === GAME_STATE.GAME_OVER || gameState === GAME_STATE.WAITING_FOR_NEXT_ROUND ? <button onClick={event => {restartButton()}}>Restart</button> : <></>
-                        }
-                        
-                    </>
-                    */}
-                <>
-                    {/*
-                        !process.env.NODE_ENV || process.env.NODE_ENV === 'development' ?
-                        <button onClick={event => {setSimulation(s => s = !s)}}>Simulation {simulation ? <>OFF</> : <>ON</>}</button>
-                        : <></>
-                    */}
-                Learn how to play!
-                </>
-            </Controls>
-                    <Controls 
-                        showZoom={false}
-                        showFitView={false}
-                        showInteractive={false}
-                        position="top"
-                    >
-                        {
-                            linesColors.includes("yellow") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"yellow",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("red") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"red",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("blue") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"blue",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("green") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"green",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("pink") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"pink",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("black") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"black",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                        {
-                            linesColors.includes("orange") ?
-                            <ControlButton style={{background:"white"}}>
-                                <SiMetrodeparis style={
-                                    {
-                                        color:"orange",
-                                        background:"white",
-                                    }
-                                    }/>
-                            </ControlButton>
-                            :
-                            <></>
-                        }
-                    </Controls>
                     <MiniMap></MiniMap>
                     </ReactFlow>
                 </ReactFlowProvider>

@@ -91,6 +91,9 @@ const gameSlice = createSlice({
             }
         },
         buildLine: (state, {payload}) => {
+            if (state.gameState !== GAME_STATE.STARTED){
+                return;
+            }
             // Remove the last section of a line if it is connectected to itself.
             if (payload.source === payload.target){
                 const lineToDelete = state.lines.find(line => line.data.color === payload.sourceHandle && (line.target === payload.source || line.source === payload.source));

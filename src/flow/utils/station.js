@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Handle, useEdges } from "reactflow";
-import { selectStationTrains } from "../../state/selectors";
+import { Game__IsRunning, selectStationTrains } from "../../state/selectors";
 import { useSelector } from "react-redux";
 import { lImpatientPassengerMargin, lPassengerMarginOnTrain } from "../../config";
 import { randomNumber } from "../../state/logic";
@@ -18,6 +18,9 @@ export default memo((props) => {
       }
 		}
 	});
+
+	const isGameRunning = useSelector(Game__IsRunning);
+
     return (
       <div
         style={{
@@ -51,41 +54,12 @@ export default memo((props) => {
 					}
 					>
 						<Handle
-						id={line}
-						isConnectable={false}
-						style={
-							{ 
-								position: "absolute",
-								background: "gray",
-								zIndex: -1,
-								width: "20px",
-								height: "1px",
-								borderRadius: 0,
-								left: 0,
-								right: 0,
-								top:0,
-								bottom:0,
-								marginTop: `${marginTop}px`,
-								marginLeft: `${marginLeft}px`,
-								transform: `rotate(${degree}deg)`,
-							}
-						}>
-						</Handle>
-					</div> : <div
-						key={index} 
-						style={
-							{
-								display:"flow",
-								zIndex: 2,
-							}
-						}
-						>
-							<Handle
 							id={line}
+							isConnectable={isGameRunning}
 							style={
 								{ 
 									position: "absolute",
-									background: edges[0].data.color,
+									background: "gray",
 									zIndex: -1,
 									width: "20px",
 									height: "1px",
@@ -98,8 +72,38 @@ export default memo((props) => {
 									marginLeft: `${marginLeft}px`,
 									transform: `rotate(${degree}deg)`,
 								}
-							}>
-							</Handle>
+							}
+						/>
+					</div> : <div
+						key={index} 
+						style={
+							{
+								display:"flow",
+								zIndex: 2,
+							}
+						}
+						>
+							<Handle
+								id={line}
+								style={
+									{ 
+										position: "absolute",
+										background: edges[0].data.color,
+										zIndex: -1,
+										width: "20px",
+										height: "1px",
+										borderRadius: 0,
+										left: 0,
+										right: 0,
+										top:0,
+										bottom:0,
+										marginTop: `${marginTop}px`,
+										marginLeft: `${marginLeft}px`,
+										transform: `rotate(${degree}deg)`,
+									}
+								}
+								isConnectable={isGameRunning}
+							/>
 						</div>
 				} else {
 					return <React.Fragment key={index}></React.Fragment>
@@ -153,7 +157,7 @@ export default memo((props) => {
                     top:"2px",
                 }
             }
-            isConnectable={true}
+			isConnectable={isGameRunning}
         />
         <span
           style={

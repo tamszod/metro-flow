@@ -5,17 +5,21 @@ import './popup.css';
 export const PopUp = forwardRef((
     {
         // Values
-        style, // Support for style property
+        style = {}, // Support for style property
         open, // Default state of pop-up
         title, // Name of the window
-        draggable, // Sets the window draggability
+        draggable = false, // Sets the window draggability
+        resizable = false, // Sets the window resizability
+        resize = "both", // Default resize option ["both", "vertical", "horizontal"]
+        position = "center", // PopUp placement
         // Events
-        onClose, // Event triggered when closing the pop-up. If not given the pop-window will not display a close button.
+        onClose = null, // Event triggered when closing the pop-up. If not given the pop-window will not display a close button.
         children // Child component
     },
     dialog
 ) => {
-    const [position, setPosition] = useState({});
+    dialog = useRef();
+    const [currentPositon, setCurrentPosion] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
@@ -23,6 +27,14 @@ export const PopUp = forwardRef((
         if (!draggable){
             return;
         }
+        if (!currentPositon){ // FIRST DRAG
+            const rect = dialog.current.getBoundingClientRect();
+            setCurrentPosion({ 
+                marginTop: window.innerHeight/2-(rect.height/2), 
+                marginLeft: window.innerWidth/2-(rect.width/2),
+            });
+            dialog.current.classList.remove("ui__popup_position__middle")
+        } 
         setIsDragging(true);
         dragStart.current = { x: e.clientX, y: e.clientY };
     };
@@ -34,7 +46,7 @@ export const PopUp = forwardRef((
         if (isDragging) {
             const dx = e.clientX - dragStart.current.x;
             const dy = e.clientY - dragStart.current.y;
-            setPosition(prevPosition => ({
+            setCurrentPosion(prevPosition => ({
                 marginTop: prevPosition.marginTop + dy,
                 marginLeft: prevPosition.marginLeft + dx
             }));
@@ -61,27 +73,21 @@ export const PopUp = forwardRef((
         };
       }, [isDragging]);
 
-    useEffect(() => {
-        if (!draggable){
-            return;
-        }
-        if (dialog?.current){
-            const rect = dialog.current.getBoundingClientRect();
-            setPosition({ marginTop: window.innerHeight/2-(rect.height/2), marginLeft: window.innerWidth/2-(rect.width/2)});
-            dialog.current.classList.remove("ui__popup_position__middle")
-        }
-    }, [draggable, dialog, setPosition]);
-
     return (
         <dialog 
             ref={dialog}
             style={{
                 ...style,
-                ...position,
+                ...currentPositon,
+                ...resizable ? {
+                    resize,
+                    overflow: style.overflow ? style.overflow : style.overflowX ? style.overflowX : style.overflowY ? style.overflowY : "hidden"
+                } : {}
             }}
             className='ui__popup_hidden ui__popup ui__popup_position__middle' 
             open={open}
-            >
+            onResize={e => console.log("asd")}    
+        >
             <nav
                 className='ui__popup__header'
                 onMouseDown={handleMouseDown}
@@ -102,6 +108,8 @@ export const PopUp = forwardRef((
                     <></>
                 }
             </nav>
-        {children}
+        <div className='ui__popup__content'>
+            {children}
+        </div>
     </dialog>)
 })

@@ -1,6 +1,16 @@
 .dialog__start {
     font-family: Arial, sans-serif;
+    width: "40vw";
+    height: "30vh";
+    
 }
+
+/*
+    style = {{
+        width: "40vw",
+        height: "30vh",
+    }}
+*/
 
 .dialog__start .ui__popup__header__title{
     font-size: 44px;
@@ -14,15 +24,16 @@
 }
 
 .dialog__start_text{
-    margin-top: 50px;
+    margin-top: 7vh;
     text-align: justify;
+    overflow: auto;
+    max-height: 25vh;
+    height: 25vh;
 }
 
 .dialog__start__start_button{
-    position: fixed;
-    top: 25vh;
-    left: 20vw;
-    transform: translate(-50%, 0%);
+    margin-left: 20vw;
+    transform: translate(-50%, -25%);
     cursor: pointer;
     background-color: white;
     width: 12vw;
@@ -34,7 +45,12 @@
 }
 
 .dialog__start__footer{
-    position: fixed;
     font-weight: bold;
     top: 30vh;
+}
+
+@media screen and (max-width: 614px) {
+    .dialog__start__start_button {
+        height: 5vh;
+    }
 }

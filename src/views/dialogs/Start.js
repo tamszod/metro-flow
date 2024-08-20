@@ -1,32 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { PopUp } from "../../ui/popup"
 import { nextRound } from "../../state/slice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Start__IsOpen } from "../../state/dialog/selector";
 
-export const StartMenu = () => {
+export const Start = () => {
     const dispatch = useDispatch();
-    const [open, setOpen] = useState(true);
-    const popRef = useRef(null);
-
-    const StartGame = () => {
-        setOpen(false);
-        dispatch(nextRound());
-    }
-
     return (
         <div
             className='dialog__start'
         >
             <PopUp
-                ref={popRef}
                 style = {{
                     width: "40vw",
-                    height: "30vh",
+                    height: "40vh",
                 }}
-                open={open}
+                open={useSelector(Start__IsOpen)}
                 title={"MetroFlow"}
-                draggable={false}
-                onClose={null}
             >
                 <p
                     className="dialog__start_text"
@@ -37,7 +27,7 @@ export const StartMenu = () => {
                 </p>
                 <button
                     className="dialog__start__start_button"
-                    onClick={StartGame}
+                    onClick={_ => dispatch(nextRound())}
                 >
                     <span>Play now!</span>
                 </button>

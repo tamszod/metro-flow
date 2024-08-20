@@ -1,5 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { pace } from "../config";
+import { GAME_STATE } from "./slice";
 
 export const selectNodes = (state) => state.game.stations; // TO BE REPLACED SOLELY BY selectStations
 export const selectLifeTimeLeft = (state) => state.game.lifeTimeLeft;
@@ -56,3 +57,7 @@ export const selectLinesColors = createSelector(
         return colors;
     }
 )
+
+// IsGameRunning
+
+export const Game__IsRunning = (state) => state.game.gameState == GAME_STATE.STARTED;

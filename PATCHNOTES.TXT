@@ -1,3 +1,8 @@
+ALPHA 3.0 
+
+
+============================================================================================================================================================================================
+
 ALPHA 2.2.1 - HOTFIX
 
 Gameplay:
@@ -13,7 +18,7 @@ Known Issues:
     - If you have shared sections of lines and delete one of them the route will be inaccessable for passengers until you delete the other section and rebuild it. (To be fixed in 3.1)
     - If you add extra trains to a line then delete sections and the criteria is no longer met, the extra trains will be not removed.
 
-=====================================================================================================================================
+============================================================================================================================================================================================
 
 ALPHA 2.2
 

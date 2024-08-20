@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Flow } from "./flow/flow";
 import { PopUp } from "./ui/popup";
-import { StartMenu } from "./views/dialogs/StartMenu";
+import { Start, StartMenu } from "./views/dialogs/Start";
+import { LearnToPlay } from "./views/dialogs/LearnToPlay";
+import { GameOver } from "./views/dialogs/GameOver";
+import { DayEnded } from "./views/dialogs/DayEnded";
+import { UI } from "./views/game/ui";
 
 function App() {
   return (
     <>
-      <StartMenu />
+      <Start />
+      <LearnToPlay />
+      <GameOver />
+      <DayEnded />
+      <UI />
       <Flow />
    </>
   );
