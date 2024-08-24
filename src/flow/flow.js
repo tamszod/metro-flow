@@ -18,13 +18,10 @@ export const heatFrameMs = 50;
 export const Flow = () => {
     const dispatch = useDispatch();
     const [simulation, setSimulation] = useState(true)
-    const passengers = useSelector(selectPassengers);
     const iLifeTimeLeft = useSelector(selectLifeTimeLeft);
     const gameState = useSelector(selectGameState);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
-    
-    const linesColors = useSelector(selectLinesColors);
     const gameLoopTimer = useRef();
 
     useEffect(() => {

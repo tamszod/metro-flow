@@ -32,6 +32,7 @@ const initialState = {
     passengers : 0,
     lifeTimeLeft: 60.0,
     time: 0,
+    maxTime: 0,
     gameState : GAME_STATE.NOT_STARTED,
 }
 
@@ -319,7 +320,19 @@ const gameSlice = createSlice({
                 return train;
             });
             // Reveal stations
-            if ((state.round > 1 && state.time % pace === 0) || (state.round === 1 && state.time % 1 === 0)){
+            if (
+                (state.round > 1 && (
+                    (((state.maxTime-roundStartDelay) / pace) - state.futureStations.length) 
+                    < 
+                    Math.floor(state.time / pace))
+                ) 
+                || 
+                (state.round === 1 && (
+                    (((state.maxTime-roundStartDelay) / 2) - state.futureStations.length) 
+                    < 
+                    state.time / 2))
+                )
+            {
                 if (state.futureStations.length > 0){
                     const newStation = {
                         id: `${state.stations.length + 1}`,
@@ -337,16 +350,14 @@ const gameSlice = createSlice({
                 bHeated = true;
             }
             if (bHeated){
-                console.log("heated")
                 state.lifeTimeLeft -= payload/1000;
                 if (state.lifeTimeLeft < 0-payload/1000){
-                    alert("Game over!\nYou have transported " + state.passengers +" passengers!");
                     state.gameState = GAME_STATE.GAME_OVER;
                 }
             }
             //Adjust game time
-            state.time = (state.time - payload/1000).toFixed(4);
-            if (state.time < 0){
+            state.time = (state.time + payload/1000)//.toFixed(4);
+            if (state.maxTime < state.time){
                 state.gameState = GAME_STATE.WAITING_FOR_NEXT_ROUND;
             }
         },
@@ -424,11 +435,11 @@ const gameSlice = createSlice({
 
             // Set game time
             if (state.round > 1){
-                state.time = state.futureStations.length*pace+roundStartDelay;
+                state.maxTime = state.futureStations.length*pace+roundStartDelay;
             } else {
-                state.time = state.futureStations.length+roundStartDelay*2;
+                state.maxTime = state.futureStations.length+roundStartDelay*2;
             }
-
+            state.time = 0;
             // Set game state
             state.gameState = GAME_STATE.STARTED;
         },

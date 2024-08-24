@@ -3,7 +3,7 @@ export const bonusStationsMultiplier = 5; // After given days finished the gener
 export const areaWidth = 80;
 export const areaHeight = 80;
 export const cut = 15; 
-export const pace = 12; //12
+export const pace = 1; //12
 export const roundStartDelay = 4; //4
 export const placeIndicators = [
     "Square", "Park", "Churchyard", "Street", "Riverside",

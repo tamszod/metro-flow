@@ -61,3 +61,7 @@ export const selectLinesColors = createSelector(
 // IsGameRunning
 
 export const Game__IsRunning = (state) => state.game.gameState == GAME_STATE.STARTED;
+
+// Timers selector
+
+export const Game__TimeProgress = (state) => state.game.maxTime ? (state.game.time/state.game.maxTime) : 0;
