@@ -8,7 +8,6 @@ const GetClockHandPositon = (radius, progress) => {
     let angle = 2 * Math.PI * progress - (Math.PI / 2);
     let x = radius * Math.cos(angle);
     let y = radius * Math.sin(angle);
-
     return [x, y];
 }
 

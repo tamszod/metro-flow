@@ -3,7 +3,7 @@ import { addEdge } from "reactflow";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger, sGenerateRandomRGBColor } from "./logic";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound } from "../config";
 
 export const fixedStationsPerRound = 9;
 
@@ -30,10 +30,11 @@ const initialState = {
     trains: [],
     round: 0,
     passengers : 0,
-    lifeTimeLeft: 60.0,
+    lifeTimeLeft: STARTING_HEAT_TIMER,
     time: 0,
     maxTime: 0,
     gameState : GAME_STATE.NOT_STARTED,
+    bHeated: false,
 }
 
 const gameSlice = createSlice({
@@ -345,11 +346,11 @@ const gameSlice = createSlice({
                 }
             }
             // Check if too many passengers are waiting!
-            let bHeated = false;
-            if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit)){
-                bHeated = true;
+            state.bHeated = false;
+            if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit )){
+                state.bHeated = true;
             }
-            if (bHeated){
+            if (state.bHeated){
                 state.lifeTimeLeft -= payload/1000;
                 if (state.lifeTimeLeft < 0-payload/1000){
                     state.gameState = GAME_STATE.GAME_OVER;

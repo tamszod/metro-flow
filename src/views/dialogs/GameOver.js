@@ -11,6 +11,7 @@ export const GameOver = () => {
     return (
         <PopUp
             open={useSelector(GameOver__IsOpen)}
+            title={"Game Over!"}
         >
             <button
                  onClick={_ => 

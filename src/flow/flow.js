@@ -74,24 +74,6 @@ export const Flow = () => {
                         disableKeyboardA11y={false}
                         deleteKeyCode={null}
                     >
-
-                        <strong
-                            style={{
-                                marginLeft:"10px",
-                                transform: "translate(-50%, -50%)",
-                            }}
-                        ></strong>
-                        <strong style={{
-                            margin:"50px",
-                        }}>
-                        </strong>
-                        <strong
-                            style={{
-                                color: (iLifeTimeLeft < 10 ? "red" : "black")
-                            }}
-                        >
-                        Life left: {iLifeTimeLeft > 0 ? (iLifeTimeLeft).toFixed(2) : "0.00"}s
-                        </strong>
                     <MiniMap></MiniMap>
                     </ReactFlow>
                 </ReactFlowProvider>

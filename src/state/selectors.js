@@ -1,5 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
-import { pace } from "../config";
+import { pace, STARTING_HEAT_TIMER } from "../config";
 import { GAME_STATE } from "./slice";
 
 export const selectNodes = (state) => state.game.stations; // TO BE REPLACED SOLELY BY selectStations
@@ -60,8 +60,13 @@ export const selectLinesColors = createSelector(
 
 // IsGameRunning
 
-export const Game__IsRunning = (state) => state.game.gameState == GAME_STATE.STARTED;
+export const Game__IsRunning = (state) => state.game.gameState === GAME_STATE.STARTED;
 
 // Timers selector
 
 export const Game__TimeProgress = (state) => state.game.maxTime ? (state.game.time/state.game.maxTime) : 0;
+export const Game__HeatTimeProgress = (state) => state.game.lifeTimeLeft / STARTING_HEAT_TIMER;
+
+
+// Heat
+export const Game_IsHeated = (state) => state.game.bHeated;
