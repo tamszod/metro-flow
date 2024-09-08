@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Station from './utils/station'
-import ReactFlow, { ControlButton, Controls, MiniMap, ReactFlowProvider } from "reactflow"
+import ReactFlow, { MiniMap, ReactFlowProvider } from "reactflow"
 import Line from "./utils/line";
 import 'reactflow/dist/style.css';
-import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
-import { addTrainToLine, buildLine, GAME_STATE, nextFrame, nextRound, restart } from "../state/slice";
-import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectGameState, selectTimeLeft, Game__IsSimulated } from "../state/selectors";
+import { addTrainToLine, buildLine, GAME_STATE, nextFrame } from "../state/slice";
+import { selectEdges, selectNodes, selectGameState, Game__IsSimulated } from "../state/selectors";
 import { areaHeight, areaWidth } from "../config";
-import { LearnToPlay__SetOpen } from "../state/dialog/slice";
 
 const proOptions = { hideAttribution: true };
 
