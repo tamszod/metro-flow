@@ -1,7 +1,30 @@
+ALPHA 3.0 - UI Enhancement Update
+
+Gameplay:
+    - The passenger satisfaction bar will now only decrease if no train is at the station.
+
+Features:
+    - Improved UI:
+        . The round timer has been replaced by a clock.
+        . The passenger heat timer has been replaced by a bar and is now referred to as the passenger satisfaction bar.
+        . Some text has been replaced with icons.
+        . Several UI elements have been relocated.
+        . The game area now takes up the full screen of the app.
+    - Added a new tab, "Learn To Play", where you can learn how the game works.
+    - The Start Game, Next Day, and Restart buttons have been replaced with pop-up dialogs.
+    - Added Game Pause and Resume functionality.
+
+Bugfixes:
+    - Fixed an issue where deleting a metro line completely after placing another line caused the game to crash/break when rebuilding the deleted line.
+    - Fixed an issue where sometimes invalid routes could be built if a station was selected beforehand.
+    - Fixed an issue where trains were not deleted if the number of trains did not meet the criteria per line.
+
+============================================================================================================================================================================================
+
 ALPHA 2.2.1 - HOTFIX
 
 Gameplay:
-    - Trains default speed has been decreased by 20%. (In the future you will be able to upgrade it and the default will be even lower at that point.)
+    - Trains default speed has been decreased by 20%.
     - The first round has been shortened compared to others.
 
 Bugfixes:
@@ -13,7 +36,7 @@ Known Issues:
     - If you have shared sections of lines and delete one of them the route will be inaccessable for passengers until you delete the other section and rebuild it. (To be fixed in 3.1)
     - If you add extra trains to a line then delete sections and the criteria is no longer met, the extra trains will be not removed.
 
-=====================================================================================================================================
+============================================================================================================================================================================================
 
 ALPHA 2.2
 

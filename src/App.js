@@ -1,15 +1,29 @@
+import { useState } from "react";
 import { Flow } from "./flow/flow";
+import { PopUp } from "./ui/popup";
+import { Start, StartMenu } from "./views/dialogs/Start";
+import { LearnToPlay } from "./views/dialogs/LearnToPlay";
+import { GameOver } from "./views/dialogs/GameOver";
+import { DayEnded } from "./views/dialogs/DayEnded";
+import { UI } from "./views/game/ui";
 
 function App() {
   return (
-    <div style={{
-      left:0,
-      top:0,
-    }}>
-      <h1>Metro Flow (Alpha 2.2.1)</h1>
+    <>
+      <Start />
+      <LearnToPlay />
+      <GameOver />
+      <DayEnded />
+      <UI />
       <Flow />
-    </div>
+   </>
   );
 }
 
 export default App;
+
+    /*<div style={{
+      left:0,
+      top:0,
+    }}>
+      <h1>Metro Flow (Alpha 2.2.1)</h1>*/

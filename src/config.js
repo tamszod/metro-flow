@@ -5,6 +5,10 @@ export const areaHeight = 80;
 export const cut = 15; 
 export const pace = 12; //12
 export const roundStartDelay = 4; //4
+export const STARTING_HEAT_TIMER = 60;
+
+export const TRAIN_LIMIT_PER_LINE_SECTION = 10; //10
+
 export const placeIndicators = [
     "Square", "Park", "Churchyard", "Street", "Riverside",
     "Alley", "Gardens", "Way", "Canal", "Beach", "Point", 

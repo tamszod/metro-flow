@@ -3,7 +3,7 @@ import { addEdge } from "reactflow";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger, sGenerateRandomRGBColor } from "./logic";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound, TRAIN_LIMIT_PER_LINE_SECTION } from "../config";
 
 export const fixedStationsPerRound = 9;
 
@@ -30,9 +30,12 @@ const initialState = {
     trains: [],
     round: 0,
     passengers : 0,
-    lifeTimeLeft: 60.0,
+    lifeTimeLeft: STARTING_HEAT_TIMER,
     time: 0,
+    maxTime: 0,
     gameState : GAME_STATE.NOT_STARTED,
+    bHeated: false,
+    simulated: true,
 }
 
 const gameSlice = createSlice({
@@ -91,10 +94,23 @@ const gameSlice = createSlice({
             }
         },
         buildLine: (state, {payload}) => {
+            if (state.gameState !== GAME_STATE.STARTED){
+                return;
+            }
             // Remove the last section of a line if it is connectected to itself.
             if (payload.source === payload.target){
                 const lineToDelete = state.lines.find(line => line.data.color === payload.sourceHandle && (line.target === payload.source || line.source === payload.source));
                 lineToDelete.data.isDeleting = true;
+
+                // Start removal if too many trains are on the line sections.
+                const lines = state.lines.filter(line => line.data.color === lineToDelete.data.color);
+                const trains = state.trains.filter(train => train.traits.color === lineToDelete.data.color);
+                let trainLimit = Math.ceil(lines.length / TRAIN_LIMIT_PER_LINE_SECTION);
+
+                while (trains.length > trainLimit){
+                    trains[trainLimit++].data.isDeleting = true;
+                }
+
                 return;
             }
             //
@@ -107,7 +123,9 @@ const gameSlice = createSlice({
                     }
                 })
                 if (lines.length > 0){
-                    const lineId = `${state.lines.length}`;
+                    const lineId = state.lines.reduce((prev, curr) => (
+                        prev <= curr.id ? curr.id + 1 : prev
+                    ), 0);
                     const sourcePos = state.stations.find(station => station.id===payload.source).position;
                     const targetPos = state.stations.find(station => station.id===payload.target).position;
                     state.lines = addEdge({
@@ -125,9 +143,12 @@ const gameSlice = createSlice({
                             state.lines
                         );
                     state.trains = [...state.trains, {
-                        id: state.trains.length,
+                        id: state.trains.reduce((prev, curr) => (
+                            prev <= curr.id ? curr.id + 1 : prev
+                        ), 0),
                         data : {
                             passengers : [],
+                            isDeleting: false,
                         },
                         currentPos: {
                             id: lineId,  // 
@@ -161,11 +182,18 @@ const gameSlice = createSlice({
                     line.source === payload.target || 
                     line.target === payload.target || 
                     line.target === payload.source) && line.data.color === payload.sourceHandle).length > 1){
-                        alert("Circular line is not allowed!");
-                        return;
-                    }
+                    alert("Circular line is not allowed!");
+                    return;
+                }
+                // #36 Check if the source already has another line of the same color connected to it to prevent building an invalid one."
+                if (!state.lines.find(line => line.data.color === payload.sourceHandle && (payload.source === line.target || payload.source === line.source))){
+                    return;
+                }
                 state.lines = addEdge({
                     ...payload,
+                    id : state.lines.reduce((prev, curr) => (
+                        prev <= curr.id ? curr.id + 1 : prev
+                    ), 0),
                     sourceHandle: "station",
                     targetHandle: "station",
                     type: "line",
@@ -204,6 +232,7 @@ const gameSlice = createSlice({
                     } else {
                         train.currentPos.delay = train.traits.transferSpeed;
                     }
+
                     const station = state.stations.find(station => station.id === train.currentPos.id);
                     let lines = state.lines.filter(line => (line.source === station.id || line.target === station.id) && line.data.color === train.traits.color);
                     let line = null;
@@ -222,14 +251,14 @@ const gameSlice = createSlice({
                             iPassenger = nI;
                             actionPassenger = "ARRIVED";
                             return true;
-                        } else if(objPassenger.travelPlan[objPassenger.travelPlan.length-2] !== nextStationId) {
+                        } else if(train.data.isDeleting || objPassenger.travelPlan[objPassenger.travelPlan.length-2] !== nextStationId) {
                             iPassenger = nI;
                             actionPassenger = "DISEMBARKED";
                             return true;
                         }
                         return false;
                     });
-                    if (!bPassangerTransfered && train.data.passengers.length < train.traits.capicity){
+                    if (!bPassangerTransfered && train.data.passengers.length < train.traits.capicity && !train.data.isDeleting){
                         station.data.passengers = station.data.passengers.map((objPassenger, nI) => {
                             if (bPassangerTransfered){
                                 return objPassenger;
@@ -280,6 +309,13 @@ const gameSlice = createSlice({
                         return passenger;
                     })
 
+                    // Remove train color from trainsIn.
+                    const colorIndex = station.data.trainsIn.findIndex(color => color === train.traits.color);
+                    station.data.trainsIn = [
+                        ...station.data.trainsIn.slice(0,colorIndex),
+                        ...station.data.trainsIn.slice(colorIndex+1)
+                    ];
+
                     train.lastPos = {...train.currentPos};
                     train.currentPos.type = "line";
                     train.currentPos.id = line.id;
@@ -297,26 +333,62 @@ const gameSlice = createSlice({
                     const distance = (train.traits.speed/100) / Math.sqrt(((line.data.sourcePos.x - line.data.targetPos.x)**2 + (line.data.sourcePos.y - line.data.targetPos.y)**2));
                     if (train.currentPos.data.source < train.currentPos.data.target){
                         train.currentPos.data.distance += distance;
-                        if (train.currentPos.data.distance >= 1.0){
-                            train.lastPos = {...train.currentPos};
-                            train.currentPos.type="station";
-                            train.currentPos.id=line.target;
-                            train.currentPos.data.delay = train.traits.transferSpeed;
-                        }
+                            const station = state.stations.find(station => station.id === line.target); /// Train trafic: trains can not be inside themself.
+                            //if (station.data.trainsIn.includes(train.traits.color)){
+                            //    if (train.currentPos.data.distance > 0.9){
+                            //        train.currentPos.data.distance -= distance;
+                            //    }
+                            //} else {
+                                if (train.currentPos.data.distance >= 1.0){
+                                train.lastPos = {...train.currentPos};
+                                train.currentPos.type="station";
+                                train.currentPos.id=line.target;
+                                train.currentPos.data.delay = train.traits.transferSpeed;
+                                station.data.trainsIn = [...station.data.trainsIn, train.traits.color];
+                            }
+                        //}
                     } else {
                         train.currentPos.data.distance -= distance;
-                        if (train.currentPos.data.distance <= 0.0){
-                            train.lastPos = {...train.currentPos};
-                            train.currentPos.type="station";
-                            train.currentPos.id=line.source;
-                            train.currentPos.data.delay = train.traits.transferSpeed;
-                        }
+                            const station = state.stations.find(station => station.id === line.source);
+                            //if (station.data.trainsIn.includes(train.traits.color)){
+                            //    if (train.currentPos.data.distance < 0.1){
+                            //        train.currentPos.data.distance += distance;
+                            //    }
+                            //} else {
+                            if (train.currentPos.data.distance <= 0.0){
+                                train.lastPos = {...train.currentPos};
+                                train.currentPos.type="station";
+                                train.currentPos.id=line.source;
+                                train.currentPos.data.delay = train.traits.transferSpeed;
+                                station.data.trainsIn = [...station.data.trainsIn, train.traits.color];
+                            }
+                        //}
                     }
                 }
                 return train;
             });
+            // Delete trains if empty and being deleted.
+            let trainIndex;
+            while((trainIndex = state.trains.findIndex(train => train.data.isDeleting && train.data.passengers.length === 0)) !== -1 ){
+                state.trains = [
+                    ...state.trains.splice(0, trainIndex),
+                    ...state.trains.splice(trainIndex+1),
+                ]
+            }
             // Reveal stations
-            if ((state.round > 1 && state.time % pace === 0) || (state.round === 1 && state.time % 1 === 0)){
+            if (
+                (state.round > 1 && (
+                    (((state.maxTime-roundStartDelay) / pace) - state.futureStations.length) 
+                    < 
+                    Math.floor(state.time / pace))
+                ) 
+                || 
+                (state.round === 1 && (
+                    (((state.maxTime-roundStartDelay) / 2) - state.futureStations.length) 
+                    < 
+                    state.time / 2))
+                )
+            {
                 if (state.futureStations.length > 0){
                     const newStation = {
                         id: `${state.stations.length + 1}`,
@@ -329,21 +401,19 @@ const gameSlice = createSlice({
                 }
             }
             // Check if too many passengers are waiting!
-            let bHeated = false;
-            if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit)){
-                bHeated = true;
+            state.bHeated = false;
+            if (state.stations.find(station => station.data.passengers.length > station.data.passengerLimit && station.data.trainsIn.length === 0 )){
+                state.bHeated = true;
             }
-            if (bHeated){
-                console.log("heated")
+            if (state.bHeated){
                 state.lifeTimeLeft -= payload/1000;
                 if (state.lifeTimeLeft < 0-payload/1000){
-                    alert("Game over!\nYou have transported " + state.passengers +" passengers!");
                     state.gameState = GAME_STATE.GAME_OVER;
                 }
             }
             //Adjust game time
-            state.time = (state.time - payload/1000).toFixed(4);
-            if (state.time < 0){
+            state.time = (state.time + payload/1000)//.toFixed(4);
+            if (state.maxTime < state.time){
                 state.gameState = GAME_STATE.WAITING_FOR_NEXT_ROUND;
             }
         },
@@ -396,6 +466,7 @@ const gameSlice = createSlice({
                         color: sGenerateRandomRGBColor(),
                         passengerLimit: 10,
                         passengers: [],
+                        trainsIn: [],
                     }
                     return station;
                 });
@@ -421,11 +492,11 @@ const gameSlice = createSlice({
 
             // Set game time
             if (state.round > 1){
-                state.time = state.futureStations.length*pace+roundStartDelay;
+                state.maxTime = state.futureStations.length*pace+roundStartDelay;
             } else {
-                state.time = state.futureStations.length+roundStartDelay*2;
+                state.maxTime = state.futureStations.length+roundStartDelay*2;
             }
-
+            state.time = 0;
             // Set game state
             state.gameState = GAME_STATE.STARTED;
         },
@@ -434,16 +505,19 @@ const gameSlice = createSlice({
             console.log(payload)
             const lines = state.lines.filter(objLine => objLine.data.color === line.data.color);
             const trains = state.trains.filter(objTrain => objTrain.traits.color === line.data.color);
-            if (Math.floor(lines.length / 10) < trains.length){
+            if (Math.floor(lines.length / TRAIN_LIMIT_PER_LINE_SECTION) < trains.length){
                 alert("You have reached the maximum trains you can add to this line!");
                 return;
             }
             state.trains = [
                 ...state.trains, 
                 {
-                    id: state.trains.length,
+                    id: state.trains.reduce((prev, curr) => (
+                        prev <= curr.id ? curr.id + 1 : prev
+                    ), 0),
                     data : {
                         passengers : [],
+                        isDeleting: false,
                     },
                     currentPos: {
                         id: line.id,  // 
@@ -468,15 +542,15 @@ const gameSlice = createSlice({
                 },
             ];
         },
-        heat: (state, {payload}) => {
-            
-        },
+        SwitchSimulated: (state) => {
+            state.simulated = !state.simulated;
+        }
     },
     extraReducers: builder => {},
 })
 
 //Actions
-export const { restart, mutateGame, buildLine, nextRound, deleteLine, nextFrame, addTrainToLine} = gameSlice.actions
+export const { restart, mutateGame, buildLine, nextRound, deleteLine, nextFrame, addTrainToLine, SwitchSimulated} = gameSlice.actions
 
 //Reducer
 export const gameReducer = gameSlice.reducer;

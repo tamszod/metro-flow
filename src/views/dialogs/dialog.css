@@ -1,0 +1,54 @@
+.ui__popup {
+    font-family: Arial, sans-serif;
+    z-index: 100000000;
+}
+
+.ui__popup__header__title {
+    margin-left: 50%;
+    transform: translate(-50%, 0%);
+    font-weight: bold;
+}
+
+.dialog__start .ui__popup__header__title{
+    font-size: 44px;
+    font-weight: bold;
+    color: rgb(0, 0, 0);
+}
+
+.dialog__start .ui__popup__header{
+    height: 50px;
+}
+
+.dialog__start__footer{
+    position: fixed;
+    margin-top: 10%;
+    font-weight: bold;
+}
+
+.dialog__start_text{
+    text-align: justify;
+    overflow: auto;
+}
+
+.dialog__button{
+    margin-left: 50%;
+    transform: translate(-55%, -10%);
+    cursor: pointer;
+    background-color: white;
+    width: 100px;
+    height: 30px;
+    border: "black solid 1px";
+}
+.dialog__button:hover{
+    background-color: lightgrey;
+}
+
+@media screen and (max-width: 614px) {
+    /*.dialog__start__start_button {
+        height: 60px;
+    }*/
+}
+
+.dialog__start__start_button{
+    position: fixed;
+}
