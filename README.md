@@ -5,7 +5,7 @@ A small web game created using ReactFlow and Redux. The goal is to satisfy deman
 
 # Version
 
-The game currently in alpha so major features are still to come!
+The game is currently in alpha, so major features are still to come!
 
 # Alpha 3.0 - UI Enhancement Update (09.09.2024)
 
@@ -27,6 +27,8 @@ The game currently in alpha so major features are still to come!
 &emsp;-Fixed an issue where deleting a metro line completely after placing another line caused the game to crash/break when rebuilding the deleted line.<br/>
 &emsp;-Fixed an issue where sometimes invalid routes could be built if a station was selected beforehand.<br/>
 &emsp;-Fixed an issue where trains were not deleted if the number of trains did not meet the criteria per line.<br/>
+
+<img width="1466" alt="Képernyőfotó 2024-09-08 - 19 34 24" src="https://github.com/user-attachments/assets/5c8fb8d9-6b5a-413f-9f32-18899350c6c1">
 
 # Alpha 2.2.1 (08.02.2024)
 <strong>Gameplay</strong><br/>
