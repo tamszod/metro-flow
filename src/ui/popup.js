@@ -1,5 +1,5 @@
 
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 import './popup.css';
 
 export const PopUp = forwardRef((
@@ -26,7 +26,7 @@ export const PopUp = forwardRef((
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
-    const handleMouseDown = (e) => {
+    const handleMouseDown = useCallback((e) => {
         if (!draggable){
             return;
         }
@@ -40,9 +40,9 @@ export const PopUp = forwardRef((
         } 
         setIsDragging(true);
         dragStart.current = { x: e.clientX, y: e.clientY };
-    };
+    }, [draggable, currentPositon, dialog]);
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!draggable){
             return
         }
@@ -55,14 +55,14 @@ export const PopUp = forwardRef((
             }));
             dragStart.current = { x: e.clientX, y: e.clientY };
         }
-      };
+      }, [draggable, isDragging, dragStart, setCurrentPosion]);
     
-      const handleMouseUp = () => {
+      const handleMouseUp = useCallback(() => {
         if (!draggable){
             return;
         }
         setIsDragging(false);
-      };
+      }, [draggable, setIsDragging]);
 
     useEffect(() => {
         if (!draggable){
@@ -74,7 +74,7 @@ export const PopUp = forwardRef((
           window.removeEventListener('mousemove', handleMouseMove);
           window.removeEventListener('mouseup', handleMouseUp);
         };
-      }, [isDragging]);
+      }, [handleMouseMove, handleMouseUp, isDragging, draggable ]);
 
       useEffect(() => {
         const updateSize = (entries) => {
@@ -105,17 +105,19 @@ export const PopUp = forwardRef((
 
         const resizeObserver = new ResizeObserver((entries) => updateSize(entries));
 
-        if (dialog.current) {
-            resizeObserver.observe(dialog.current);
+        const currentDialog = dialog.current;
+
+        if (currentDialog) {
+            resizeObserver.observe(currentDialog);
         }
 
-        // Cleanup the observer on component unmount
+        // Cleanup the observer using the local variable
         return () => {
-            if (dialog.current) {
-                resizeObserver.unobserve(dialog.current);
+            if (currentDialog) {
+                resizeObserver.unobserve(currentDialog);
             }
         };
-    }, []);
+    }, [dialog, windowRef, contentRef]); 
 
     return (
         <dialog 

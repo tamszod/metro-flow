@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Flow } from "./flow/flow";
-import { PopUp } from "./ui/popup";
-import { Start, StartMenu } from "./views/dialogs/Start";
+import { Start } from "./views/dialogs/Start";
 import { LearnToPlay } from "./views/dialogs/LearnToPlay";
 import { GameOver } from "./views/dialogs/GameOver";
 import { DayEnded } from "./views/dialogs/DayEnded";

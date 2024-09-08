@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { PopUp } from "../../ui/popup"
 import { nextRound } from "../../state/slice";
 import { useDispatch, useSelector } from "react-redux";
