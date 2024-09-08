@@ -3,7 +3,7 @@ import { addEdge } from "reactflow";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger, sGenerateRandomRGBColor } from "./logic";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound, TRAIN_LIMIT_PER_LINE_SECTION } from "../config";
 
 export const fixedStationsPerRound = 9;
 
@@ -101,6 +101,16 @@ const gameSlice = createSlice({
             if (payload.source === payload.target){
                 const lineToDelete = state.lines.find(line => line.data.color === payload.sourceHandle && (line.target === payload.source || line.source === payload.source));
                 lineToDelete.data.isDeleting = true;
+
+                // Start removal if too many trains are on the line sections.
+                const lines = state.lines.filter(line => line.data.color === lineToDelete.data.color);
+                const trains = state.trains.filter(train => train.traits.color === lineToDelete.data.color);
+                let trainLimit = Math.ceil(lines.length / TRAIN_LIMIT_PER_LINE_SECTION);
+
+                while (trains.length > trainLimit){
+                    trains[trainLimit++].data.isDeleting = true;
+                }
+
                 return;
             }
             //
@@ -138,6 +148,7 @@ const gameSlice = createSlice({
                         ), 0),
                         data : {
                             passengers : [],
+                            isDeleting: false,
                         },
                         currentPos: {
                             id: lineId,  // 
@@ -221,6 +232,7 @@ const gameSlice = createSlice({
                     } else {
                         train.currentPos.delay = train.traits.transferSpeed;
                     }
+
                     const station = state.stations.find(station => station.id === train.currentPos.id);
                     let lines = state.lines.filter(line => (line.source === station.id || line.target === station.id) && line.data.color === train.traits.color);
                     let line = null;
@@ -239,14 +251,14 @@ const gameSlice = createSlice({
                             iPassenger = nI;
                             actionPassenger = "ARRIVED";
                             return true;
-                        } else if(objPassenger.travelPlan[objPassenger.travelPlan.length-2] !== nextStationId) {
+                        } else if(train.data.isDeleting || objPassenger.travelPlan[objPassenger.travelPlan.length-2] !== nextStationId) {
                             iPassenger = nI;
                             actionPassenger = "DISEMBARKED";
                             return true;
                         }
                         return false;
                     });
-                    if (!bPassangerTransfered && train.data.passengers.length < train.traits.capicity){
+                    if (!bPassangerTransfered && train.data.passengers.length < train.traits.capicity && !train.data.isDeleting){
                         station.data.passengers = station.data.passengers.map((objPassenger, nI) => {
                             if (bPassangerTransfered){
                                 return objPassenger;
@@ -355,6 +367,14 @@ const gameSlice = createSlice({
                 }
                 return train;
             });
+            // Delete trains if empty and being deleted.
+            let trainIndex;
+            while((trainIndex = state.trains.findIndex(train => train.data.isDeleting && train.data.passengers.length === 0)) !== -1 ){
+                state.trains = [
+                    ...state.trains.splice(0, trainIndex),
+                    ...state.trains.splice(trainIndex+1),
+                ]
+            }
             // Reveal stations
             if (
                 (state.round > 1 && (
@@ -485,7 +505,7 @@ const gameSlice = createSlice({
             console.log(payload)
             const lines = state.lines.filter(objLine => objLine.data.color === line.data.color);
             const trains = state.trains.filter(objTrain => objTrain.traits.color === line.data.color);
-            if (Math.floor(lines.length / 10) < trains.length){
+            if (Math.floor(lines.length / TRAIN_LIMIT_PER_LINE_SECTION) < trains.length){
                 alert("You have reached the maximum trains you can add to this line!");
                 return;
             }
@@ -497,6 +517,7 @@ const gameSlice = createSlice({
                     ), 0),
                     data : {
                         passengers : [],
+                        isDeleting: false,
                     },
                     currentPos: {
                         id: line.id,  // 

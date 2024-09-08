@@ -10,7 +10,7 @@ export const GameOver = () => {
         <PopUp
             style = {{
                 width: "300px",
-                height: "200px",
+                height: "300px",
             }}
             open={useSelector(GameOver__IsOpen)}
         >

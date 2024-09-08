@@ -1,20 +1,23 @@
-ALPHA 3.0 
+ALPHA 3.0 - UI Enhancement Update
 
 Gameplay:
-    - The passenger satisfaction bar will only decrease if no train is on the station.
+    - The passenger satisfaction bar will now only decrease if no train is at the station.
 
 Features:
-    - Improved UI.
+    - Improved UI:
         . The round timer has been replaced by a clock.
-        . The passenger heat timer has been replaced by a bar and now refered as a passenger satisfaction bar.
-        . Some text has been replaced by icons.
-        . Some UI elements has been relocated.
-        . The game area takes up the full screen of the app.
-    - Added a new tab "Learn To Play" where you can learn how the game works.
-    - Start game, next day, restart buttons has been replaced by pop-up dialogs.
+        . The passenger heat timer has been replaced by a bar and is now referred to as the passenger satisfaction bar.
+        . Some text has been replaced with icons.
+        . Several UI elements have been relocated.
+        . The game area now takes up the full screen of the app.
+    - Added a new tab, "Learn To Play", where you can learn how the game works.
+    - The Start Game, Next Day, and Restart buttons have been replaced with pop-up dialogs.
+    - Added Game Pause and Resume functionality.
 
 Bugfixes:
-
+    - Fixed an issue where deleting a metro line completely after placing another line caused the game to crash/break when rebuilding the deleted line.
+    - Fixed an issue where sometimes invalid routes could be built if a station was selected beforehand.
+    - Fixed an issue where trains were not deleted if the number of trains did not meet the criteria per line.
 
 ============================================================================================================================================================================================
 

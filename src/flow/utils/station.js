@@ -121,7 +121,7 @@ export default memo((props) => {
 							pointerEvents: 'all',
 							width:"22px",
 							height:"12px",
-							background:train.traits.color,
+							background: train.data.isDeleting ? "gray" : train.traits.color,
 						}}
 						className="nodrag nopan"
 					>

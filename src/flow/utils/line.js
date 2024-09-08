@@ -74,7 +74,7 @@ export default function Line({
                             pointerEvents: 'all',
                             width:"22px",
                             height:"12px",
-                            backgroundColor:color,
+							background: train.data.isDeleting ? "gray" : train.traits.color,
                         }}
                         className="nodrag nopan"
                     >
