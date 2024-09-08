@@ -7,7 +7,28 @@ A small web game created using ReactFlow and Redux. The goal is to satisfy deman
 
 The game currently in alpha so major features are still to come!
 
-# Alpha 2.2.1 (2024.08.02)
+# Alpha 3.0 - UI Enhancement Update (09.09.2024)
+
+<strong>Gameplay:</strong><br/>
+&emsp;- The passenger satisfaction bar will now only decrease if no train is at the station.<br/>
+
+<strong>Features:</strong><br/>
+&emsp;- Improved UI:<br/>
+&emsp;&emsp;. The round timer has been replaced by a clock.<br/>
+&emsp;&emsp;. The passenger heat timer has been replaced by a bar and is now referred to as the passenger satisfaction bar.<br/>
+&emsp;&emsp;. Some text has been replaced with icons.<br/>
+&emsp;&emsp;. Several UI elements have been relocated.<br/>
+&emsp;&emsp;. The game area now takes up the full screen of the app.<br/>
+&emsp;- Added a new tab, "Learn To Play", where you can learn how the game works.<br/>
+&emsp;- The Start Game, Next Day, and Restart buttons have been replaced with pop-up dialogs.<br/>
+&emsp;- Added Game Pause and Resume functionality.<br/>
+
+<strong>Bugfixes:</strong><br/>
+&emsp;-Fixed an issue where deleting a metro line completely after placing another line caused the game to crash/break when rebuilding the deleted line.<br/>
+&emsp;-Fixed an issue where sometimes invalid routes could be built if a station was selected beforehand.<br/>
+&emsp;-Fixed an issue where trains were not deleted if the number of trains did not meet the criteria per line.<br/>
+
+# Alpha 2.2.1 (08.02.2024)
 <strong>Gameplay</strong><br/>
 &emsp;- Trains default speed has been decreased by 20%.<br/>
 &emsp;- The first round has been shortened compared to others.<br/>
@@ -21,7 +42,7 @@ The game currently in alpha so major features are still to come!
 &emsp;- If you have shared sections of lines and delete one of them the route will be inaccessable for passengers until you delete the other section and rebuild it. (To be fixed in 3.1)<br/>
 &emsp;- If you add extra trains to a line then delete sections and the criteria is no longer met, the extra trains will be not removed.<br/>
 
-# Alpha 2.2 (2024.07.29)
+# Alpha 2.2 (07.29.2024)
 <strong>Gameplay</strong><br/>
 &emsp;- The trains will only move when the day is going.<br/>
 &emsp;- The round timer has been increased as an adjustment to the train changes.<br/>
@@ -38,7 +59,7 @@ The game currently in alpha so major features are still to come!
 &emsp;- Fixed app freeze at the start of a new day or mid game when a train enters a station. It was caused by circular routes resulting the pathfinder entering into an infinite loop at some cases.<br/>
 &emsp;- Fixed an issue where trains were invisible when stopping at stations.<br/>
 
-# Alpha 2.1 (2024.06.15)
+# Alpha 2.1 (06.15.2024)
 <strong>Quality of Life:</strong><br />
 &emsp;» Redesigned the line section deletion system. Now lines can be deleted on touch devices.<br />
 &emsp;» In order to delete a line, you have to connect the end of it into itself. It will be mark for deletion. If a line is being used it will stay up till the trains leave it.<br />
@@ -48,7 +69,7 @@ The game currently in alpha so major features are still to come!
 &emsp;» End of line should be visually correct.<br />
 
 
-# Alpha 2.0 - The Passenger Update (2024.05.31)
+# Alpha 2.0 - The Passenger Update (05.31.2024)
 <img width="500" alt="Alpha 2.0 Metro-Flow" src="https://github.com/tamszod/metro-flow/assets/126774257/448345e4-ffcc-4c2e-813f-9101acb36a13"><br />
 &emsp;» Each revealed station will spawn passengers at the start of the round depending on how many days it has been revealed.<br />
 &emsp;» Hovering the stations will shown the passengers travel destination.<br />
@@ -61,7 +82,7 @@ The game currently in alpha so major features are still to come!
 &emsp;» Restarting the game results in crash (It will be fixed in Alpha 2.1).<br />
 
 
-# Alpha 1.0 (2024.05.23)
+# Alpha 1.0 (05.23.2024)
 &emsp;» You can start a new day or restart the game.<br />
 &emsp;» When a day starts a set number of stations will appear on the map.<br />
 &emsp;» Each station has a unique name.<br />
