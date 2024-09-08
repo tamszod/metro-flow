@@ -70,3 +70,8 @@ export const Game__HeatTimeProgress = (state) => state.game.lifeTimeLeft / START
 
 // Heat
 export const Game_IsHeated = (state) => state.game.bHeated;
+
+
+
+// Heat
+export const Game__IsSimulated = (state) => state.game.simulated;

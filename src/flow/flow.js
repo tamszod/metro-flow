@@ -6,7 +6,7 @@ import 'reactflow/dist/style.css';
 import { SiMetrodeparis } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { addTrainToLine, buildLine, GAME_STATE, nextFrame, nextRound, restart } from "../state/slice";
-import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectGameState, selectTimeLeft } from "../state/selectors";
+import { selectLifeTimeLeft, selectDay, selectEdges, selectLinesColors, selectNodes, selectPassengers, selectGameState, selectTimeLeft, Game__IsSimulated } from "../state/selectors";
 import { areaHeight, areaWidth } from "../config";
 import { LearnToPlay__SetOpen } from "../state/dialog/slice";
 
@@ -17,8 +17,7 @@ export const heatFrameMs = 50;
 
 export const Flow = () => {
     const dispatch = useDispatch();
-    const [simulation, setSimulation] = useState(true)
-    const iLifeTimeLeft = useSelector(selectLifeTimeLeft);
+    const IsSumlated = useSelector(Game__IsSimulated);
     const gameState = useSelector(selectGameState);
     const edges = useSelector(selectEdges);
     const nodes = useSelector(selectNodes);
@@ -27,13 +26,13 @@ export const Flow = () => {
     useEffect(() => {
         if (gameState === GAME_STATE.STARTED){
             gameLoopTimer.current = setInterval(() => {
-                if (simulation){
+                if (IsSumlated){
                     dispatch(nextFrame(nextFrameMs));
                 }
             }, nextFrameMs);
             return () => clearInterval(gameLoopTimer.current);
         }
-    }, [gameState, simulation, dispatch]);
+    }, [gameState, IsSumlated, dispatch]);
 
     const nodeTypes = useMemo(() => ({ station: Station }), []);
     const edgeTypes = useMemo(() => ({ line: Line }), []);

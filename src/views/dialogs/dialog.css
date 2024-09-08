@@ -1,56 +1,54 @@
-.dialog__start {
+.ui__popup {
     font-family: Arial, sans-serif;
-    width: "40vw";
-    height: "30vh";
-    
+    z-index: 100000000;
 }
 
-/*
-    style = {{
-        width: "40vw",
-        height: "30vh",
-    }}
-*/
+.ui__popup__header__title {
+    margin-left: 50%;
+    transform: translate(-50%, 0%);
+    font-weight: bold;
+}
 
 .dialog__start .ui__popup__header__title{
     font-size: 44px;
     font-weight: bold;
     color: rgb(0, 0, 0);
-    margin-left: 1vw;
 }
 
 .dialog__start .ui__popup__header{
     height: 50px;
 }
 
-.dialog__start_text{
-    margin-top: 7vh;
-    text-align: justify;
-    overflow: auto;
-    max-height: 25vh;
-    height: 25vh;
+.dialog__start__footer{
+    position: fixed;
+    margin-top: 10%;
+    font-weight: bold;
 }
 
-.dialog__start__start_button{
-    margin-left: 20vw;
-    transform: translate(-50%, -25%);
+.dialog__start_text{
+    text-align: justify;
+    overflow: auto;
+}
+
+.dialog__button{
+    margin-left: 50%;
+    transform: translate(-55%, -10%);
     cursor: pointer;
     background-color: white;
-    width: 12vw;
-    height: 4vh;
+    width: 100px;
+    height: 30px;
     border: "black solid 1px";
 }
-.dialog__start__start_button:hover{
+.dialog__button:hover{
     background-color: lightgrey;
 }
 
-.dialog__start__footer{
-    font-weight: bold;
-    top: 30vh;
+@media screen and (max-width: 614px) {
+    /*.dialog__start__start_button {
+        height: 60px;
+    }*/
 }
 
-@media screen and (max-width: 614px) {
-    .dialog__start__start_button {
-        height: 5vh;
-    }
+.dialog__start__start_button{
+    position: fixed;
 }

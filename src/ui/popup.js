@@ -19,7 +19,10 @@ export const PopUp = forwardRef((
     dialog
 ) => {
     dialog = useRef();
+    const windowRef = useRef();
+    const contentRef = useRef();
     const [currentPositon, setCurrentPosion] = useState(null);
+    const [currentSize, setCurrentSize] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
 
@@ -73,6 +76,47 @@ export const PopUp = forwardRef((
         };
       }, [isDragging]);
 
+      useEffect(() => {
+        const updateSize = (entries) => {
+            if (entries[0].target === dialog.current) {
+                if (!windowRef.current || !contentRef.current){
+                    return;
+                }
+
+                const contentStyle = getComputedStyle(contentRef.current);
+                const paddingLeft = parseFloat(contentStyle.paddingLeft) || 0;
+                const paddingRight = parseFloat(contentStyle.paddingRight) || 0;
+                const marginLeft = parseFloat(contentStyle.marginLeft) || 0;
+                const marginRight = parseFloat(contentStyle.marginRight) || 0;
+                const paddingTop = parseFloat(contentStyle.paddingTop) || 0;
+                const paddingBottom = parseFloat(contentStyle.paddingBottom) || 0;
+                const marginTop = parseFloat(contentStyle.marginTop) || 0;
+                const marginBottom = parseFloat(contentStyle.marginBottom) || 0;
+
+                const iCutHorizontally = paddingLeft + paddingRight + marginLeft + marginRight;
+                const iCutVertically = (windowRef.current?.getBoundingClientRect().height || 0) + paddingTop + paddingBottom + marginTop + marginBottom;
+                
+                setCurrentSize({
+                    width: entries[0].contentRect.width - iCutHorizontally, 
+                    height: entries[0].contentRect.height - iCutVertically,
+                });
+            }
+        };
+
+        const resizeObserver = new ResizeObserver((entries) => updateSize(entries));
+
+        if (dialog.current) {
+            resizeObserver.observe(dialog.current);
+        }
+
+        // Cleanup the observer on component unmount
+        return () => {
+            if (dialog.current) {
+                resizeObserver.unobserve(dialog.current);
+            }
+        };
+    }, []);
+
     return (
         <dialog 
             ref={dialog}
@@ -81,16 +125,16 @@ export const PopUp = forwardRef((
                 ...currentPositon,
                 ...resizable ? {
                     resize,
-                    overflow: style.overflow ? style.overflow : style.overflowX ? style.overflowX : style.overflowY ? style.overflowY : "hidden"
+                    overflow: "hidden"
                 } : {}
             }}
             className='ui__popup_hidden ui__popup ui__popup_position__middle' 
             open={open}
-            onResize={e => console.log("asd")}    
         >
             <nav
                 className='ui__popup__header'
                 onMouseDown={handleMouseDown}
+                ref={windowRef}
             >
                 <span
                     className='ui__popup__header__title'
@@ -108,8 +152,18 @@ export const PopUp = forwardRef((
                     <></>
                 }
             </nav>
-        <div className='ui__popup__content'>
+        <div 
+            className='ui__popup__content'
+            ref={contentRef}
+            style={currentSize ? {
+                overflow: style.overflow ? style.overflow : style.overflowX ? style.overflowX : style.overflowY ? style.overflowY : "hidden",
+                height: currentSize.height,
+                width: currentSize.width,
+                maxHeight: currentSize.height,
+                maxWidth: currentSize.width,
+            }: {}}
+        >
             {children}
         </div>
     </dialog>)
-})
+});

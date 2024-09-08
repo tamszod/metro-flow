@@ -12,8 +12,8 @@ export const Start = () => {
         >
             <PopUp
                 style = {{
-                    width: "40vw",
-                    height: "40vh",
+                    width: "500px",
+                    height: "300px",
                 }}
                 open={useSelector(Start__IsOpen)}
                 title={"MetroFlow"}
@@ -21,12 +21,12 @@ export const Start = () => {
                 <p
                     className="dialog__start_text"
                 >
-                    This is an early version of my passion project about a transportation game. The goal is the satisfy the passengers by providing them a way to
-                    travel to their destination. You can build a limited amount of lines. Try to build the most efficient way for passengers to go by. Be carefull! If a station gets 
-                    too busy the passengers will become impatient. If you keep a station busy for too long the game will end!
+                    Welcome to the early version of my passion project — a transportation strategy game where your goal is to keep passengers happy by efficiently guiding them to their 
+                    destinations. You’ll have a limited number of lines to build, so plan wisely to create the most efficient routes. But be careful! Overcrowded stations will cause 
+                    passengers to lose patience. If a station remains too busy for too long, it’s game over!
                 </p>
                 <button
-                    className="dialog__start__start_button"
+                    className="dialog__start__start_button dialog__button"
                     onClick={_ => dispatch(nextRound())}
                 >
                     <span>Play now!</span>

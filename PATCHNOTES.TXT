@@ -1,5 +1,20 @@
 ALPHA 3.0 
 
+Gameplay:
+    - The passenger satisfaction bar will only decrease if no train is on the station.
+
+Features:
+    - Improved UI.
+        . The round timer has been replaced by a clock.
+        . The passenger heat timer has been replaced by a bar and now refered as a passenger satisfaction bar.
+        . Some text has been replaced by icons.
+        . Some UI elements has been relocated.
+        . The game area takes up the full screen of the app.
+    - Added a new tab "Learn To Play" where you can learn how the game works.
+    - Start game, next day, restart buttons has been replaced by pop-up dialogs.
+
+Bugfixes:
+
 
 ============================================================================================================================================================================================
 
