@@ -1,9 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { BaseEdge, EdgeLabelRenderer } from "reactflow";
-import { selectSectionTrains } from "../../../../../state/selectors";
+import { BaseEdge, EdgeLabelRenderer } from "@xyflow/react";
 import { useEffect } from "react";
-import { deleteLine } from "../../../../../state/slice";
 import { lPassengerMarginOnTrain } from "../../../../../config";
+import { deleteLine } from "../../../api/state/slice";
+import { selectSectionTrains } from "../../../api/state/selectors";
+
 /*
 const getPathPosition = (sourceX, sourceY, targetX, targetY) => {
     if (sourceX <= targetX){

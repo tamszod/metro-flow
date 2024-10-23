@@ -1,14 +1,14 @@
 import { useDispatch, useSelector } from "react-redux"
-import { Game__HeatTimeProgress, Game__IsSimulated, Game__TimeProgress, Game_IsHeated, selectDay, selectLinesColors, selectPassengers } from "../../state/selectors"
-import { LearnToPlay__SetOpen } from "../../state/dialog/slice";
+import { Game__HeatTimeProgress, Game__IsSimulated, Game__TimeProgress, Game_IsHeated, selectDay, selectLinesColors, selectPassengers } from "../../api/state/selectors";
+import { LearnToPlay__SetOpen } from "../../api/state/dialog/slice";
 import { SiMetrodeparis } from "react-icons/si";
 import { FaPeopleLine } from "react-icons/fa6";
-import { Clock } from "../../ui/clock";
-import { RProgressBar } from "../../ui/bar";
-import { lImpatientPassengerMargin } from "../../config";
-import { randomNumber } from "../../state/logic";
+import { Clock } from "../../../../ui/clock";
+import { RProgressBar } from "../../../../ui/bar";
+import { lImpatientPassengerMargin } from "../../../../config";
+import { randomNumber } from "../../api/state/logic";
 import { SlControlPause, SlControlPlay } from "react-icons/sl";
-import { SwitchSimulated } from "../../state/slice";
+import { SwitchSimulated } from "../../api/state/slice";
 
 export const UI = () => {
     const dispatch = useDispatch();

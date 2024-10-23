@@ -1,4 +1,4 @@
-import { lPassengerMarginOnTrain } from "../../config"
+import { lPassengerMarginOnTrain } from "../../../../../config"
 
 export const Train = (train) => {
     return (

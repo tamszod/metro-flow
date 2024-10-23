@@ -1,9 +1,9 @@
 import React, { memo } from "react";
-import { Handle, useEdges } from "reactflow";
-import { Game__IsRunning, selectStationTrains } from "../../../../../state/selectors";
+import { Handle, useEdges } from "@xyflow/react";
+import { Game__IsRunning, selectStationTrains } from "../../../api/state/selectors";
 import { useSelector } from "react-redux";
 import { lImpatientPassengerMargin, lPassengerMarginOnTrain } from "../../../../../config";
-import { randomNumber } from "../../../../../state/logic";
+import { randomNumber } from "../../../api/state/logic";
 
 export default memo((props) => {
   	const trains = useSelector(state => selectStationTrains(state, props.id));
@@ -27,7 +27,7 @@ export default memo((props) => {
             border: "1px black solid",
             width: "10px",
             height: "10px",
-            marginTop: "0px",
+            marginTop: "-4px",
             borderRadius: "10px",
             background: "white",
             userSelect: "none",
@@ -164,9 +164,10 @@ export default memo((props) => {
             {
               display: "block",
               fontSize:"5px",
-              marginTop: "2px",
-              marginLeft:"12px",
+              marginTop: "5px",
+              marginLeft:"15px",
               whiteSpace: "nowrap",
+			  zIndex: 100
             }
           }
         >{!process.env.NODE_ENV || process.env.NODE_ENV === 'development' ? <>{props.id}</> : <> {props.data.name} </>}</span>
@@ -176,7 +177,7 @@ export default memo((props) => {
 					key={iPassenger}
 					style={{
 						position: 'absolute',
-						zIndex: 1,
+						zIndex: 999,
 						pointerEvents: 'all',
 						width:"4.5px",
 						height:"4.5px",

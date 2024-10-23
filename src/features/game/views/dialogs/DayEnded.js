@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
-import { PopUp } from "../../ui/popup";
-import { nextRound } from "../../features/game/api/state/slice";
-import { selectDay } from "../../features/game/api/state/selectors";
-import { DayEnded__IsOpen } from "../../features/game/api/state/dialog/selector";
+import { PopUp } from "../../../../ui/popup"
+import { DayEnded__IsOpen } from "../../state/dialog/selector";
+import { nextRound } from "../../state/slice";
+import { selectDay } from "../../state/selectors";
 
 export const DayEnded = () => {
     const dispatch = useDispatch();

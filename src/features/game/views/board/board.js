@@ -1,19 +1,20 @@
 import { useEffect, useMemo, useRef } from "react";
-import Station from './utils/station'
-import ReactFlow, { MiniMap, ReactFlowProvider } from "reactflow"
-import Line from "./utils/line";
-import 'reactflow/dist/style.css';
+import Station from './components/station'
+import { ReactFlow, ReactFlowProvider, MiniMap } from '@xyflow/react';
+import Line from "./components/line";
+import '@xyflow/react/dist/style.css';
 import { useDispatch, useSelector } from "react-redux";
-import { addTrainToLine, buildLine, GAME_STATE, nextFrame } from "../state/slice";
-import { selectEdges, selectNodes, selectGameState, Game__IsSimulated } from "../state/selectors";
-import { areaHeight, areaWidth } from "../config";
+import { addTrainToLine, buildLine, GAME_STATE, nextFrame } from "../../api/state/slice";
+import { selectEdges, selectNodes, selectGameState, Game__IsSimulated } from "../../api/state/selectors";
+import { areaHeight, areaWidth } from "../../../../config";
+//import { MiniMap } from "reactflow";
 
 const proOptions = { hideAttribution: true };
 
 export const nextFrameMs = 20;
 export const heatFrameMs = 50;
 
-export const Flow = () => {
+export const Board = () => {
     const dispatch = useDispatch();
     const IsSumlated = useSelector(Game__IsSimulated);
     const gameState = useSelector(selectGameState);
@@ -71,7 +72,7 @@ export const Flow = () => {
                         disableKeyboardA11y={false}
                         deleteKeyCode={null}
                     >
-                    <MiniMap></MiniMap>
+                    <MiniMap />
                     </ReactFlow>
                 </ReactFlowProvider>
             </div>

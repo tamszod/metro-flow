@@ -1,7 +1,7 @@
-import { PopUp } from "../../ui/popup";
-import { nextRound } from "../../features/game/api/state/slice";
+import { PopUp } from "../../../../ui/popup"
+import { nextRound } from "../../state/slice";
 import { useDispatch, useSelector } from "react-redux";
-import { Start__IsOpen } from "../../features/game/api/state/dialog/selector";
+import { Start__IsOpen } from "../../state/dialog/selector";
 
 export const Start = () => {
     const dispatch = useDispatch();
@@ -33,7 +33,7 @@ export const Start = () => {
                 <footer
                     className="dialog__start__footer"
                 >
-                    Version: Alpha 3.0
+                    Version: Alpha 3.1
                 </footer>
             </PopUp>
         </div>

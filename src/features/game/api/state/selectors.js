@@ -1,5 +1,5 @@
 import { createSelector } from "@reduxjs/toolkit";
-import { pace, STARTING_HEAT_TIMER } from "../config";
+import { pace, STARTING_HEAT_TIMER } from "../../../../config";
 import { GAME_STATE } from "./slice";
 
 export const selectNodes = (state) => state.game.stations; // TO BE REPLACED SOLELY BY selectStations

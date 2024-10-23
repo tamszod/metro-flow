@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addEdge } from "reactflow";
+import { addEdge } from "@xyflow/react";
 import { bfs } from "./utilities/path";
 import { hashObject } from "./utilities/hash";
 import { formatStationName, nextGrids, randomizeDestinationForPassenger, sGenerateRandomRGBColor } from "./logic";
-import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound, TRAIN_LIMIT_PER_LINE_SECTION } from "../config";
+import { areaHeight, areaWidth, bonusStationsMultiplier, cut, pace, placeHolderNames, roundStartDelay, STARTING_HEAT_TIMER, stationsPerRound, TRAIN_LIMIT_PER_LINE_SECTION } from "../../../../config";
 
 export const fixedStationsPerRound = 9;
 

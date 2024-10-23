@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { LearnToPlay__IsOpen } from "../../features/game/api/state/dialog/selector";
-import { LearnToPlay__SetOpen } from "../../features/game/api/state/dialog/slice";
-import { PopUp } from "../../ui/popup";
+import { LearnToPlay__IsOpen } from "../../state/dialog/selector";
+import { LearnToPlay__SetOpen } from "../../state/dialog/slice";
+import { PopUp } from "../../../../ui/popup"
 import { useDispatch, useSelector } from "react-redux"
 
 

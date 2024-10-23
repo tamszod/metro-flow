@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from "react-redux"
-import { GameOver__IsOpen } from "../../features/game/api/state/dialog/selector"
-import { nextRound, restart } from "../../features/game/api/state/slice"
-import { PopUp } from "../../ui/popup"
-import { selectPassengers } from "../../features/game/api/state/selectors"
+import { PopUp } from "../../../../ui/popup"
+import { GameOver__IsOpen } from "../../state/dialog/selector"
+import { nextRound, restart } from "../../state/slice"
+import { selectPassengers } from "../../state/selectors"
 
 export const GameOver = () => {
     const dispatch = useDispatch();

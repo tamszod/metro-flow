@@ -1,4 +1,4 @@
-import { pace, placeIndicators, roundStartDelay } from "../config";
+import { pace, placeIndicators, roundStartDelay } from "../../../../config";
 import { nextRound } from "./slice";
 
 export const nextGrids = (gridIndex) => {
